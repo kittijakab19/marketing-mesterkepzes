@@ -1,4 +1,14 @@
 {
-  "results": {},
+  "results": {
+    "matstat": {
+      "parts": {
+        "I. ZH": 30,
+        "Beadandó": null,
+        "II. ZH": null
+      },
+      "bonus": 10,
+      "grade": null
+    }
+  },
   "events": {}
 }

@@ -49,6 +49,7 @@ mark { background: var(--mark); color: var(--mark-fg); border-radius: 3px; paddi
 .themebtn:hover { background: var(--accent-soft); }
 .themebtn svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .themebtn .sun { display: none; }
+.semnav { display: contents; }
 #lockBtn.on { background: var(--accent); color: var(--accent-fg); }
 @media (max-width: 1100px) { #lockBtn { order: 2; margin-left: auto; } #lockBtn + .themebtn { margin-left: 0; } }
 .dlg p { margin: 0; font-size: .92rem; color: var(--muted); }
@@ -60,7 +61,25 @@ mark { background: var(--mark); color: var(--mark-fg); border-radius: 3px; paddi
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .themebtn .sun { display: block; } :root:not([data-theme="light"]) .themebtn .moon { display: none; } }
 :root[data-theme="dark"] .themebtn .sun { display: block; } :root[data-theme="dark"] .themebtn .moon { display: none; }
 .semester { margin: 4px 0 0; font-size: 1.1rem; font-weight: 800; color: var(--muted); }
-#felev2, #felev1 { scroll-margin-top: 90px; }
+[id^="felev"] { scroll-margin-top: 90px; }
+.semhead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.addsem { padding: 10px 18px; border-radius: 14px; font-weight: 800; color: var(--accent-strong); border: 1.5px dashed var(--line); }
+.addsem:hover { background: var(--accent-soft); }
+.bandedit { align-self: flex-start; font-size: .9rem; font-weight: 700; padding: 6px 12px; border-radius: 99px; background: var(--panel); }
+.bandedit:hover { box-shadow: var(--shadow); }
+.dlg.wide { width: min(760px, 100%); }
+.dlg textarea { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-weight: 500; min-height: 76px; resize: vertical; }
+.dlg h3 { font-size: .95rem; margin-top: 4px; }
+.fldgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.rowlist { display: flex; flex-direction: column; gap: 8px; }
+.taskrow { display: grid; grid-template-columns: minmax(0, 1.4fr) 5em minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.4fr) 34px; gap: 6px; align-items: end; }
+.studyrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) 34px; gap: 6px; align-items: end; }
+.taskrow .fld span, .studyrow .fld span { font-size: .76rem; }
+.rowdel { height: 38px; border-radius: 10px; color: var(--muted); }
+.rowdel:hover { background: var(--warn-soft); color: var(--warn); }
+.addrow { align-self: flex-start; color: var(--accent-strong); font-weight: 800; font-size: .9rem; }
+.importbox { padding: 12px 14px; border-radius: 14px; background: var(--accent-soft); display: flex; flex-direction: column; gap: 6px; }
+@media (max-width: 640px) { .taskrow { grid-template-columns: 1fr 1fr; } .taskrow .rowdel { grid-column: 2; justify-self: end; width: 38px; } }
 .searchbox { flex: 1 1 260px; min-width: 0; display: flex; }
 .searchbox input { flex: 1; min-width: 0; padding: 9px 16px; border: 1px solid transparent; border-radius: 99px; background: var(--bg); }
 .searchbox input:focus { border-color: var(--accent); background: var(--panel); outline: none; }
@@ -246,8 +265,7 @@ details.panel[open] summary::before { transform: rotate(90deg); }
   <nav class="nav" aria-label="Fő menü">
     <button type="button" id="nav-naptar" style="--h:225"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Naptár</button>
     <button type="button" id="nav-kereses" style="--h:150"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Keresés</button>
-    <button type="button" id="nav-felev2" style="--h:28"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"/></svg>2. félév</button>
-    <button type="button" id="nav-felev1" style="--h:55"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"/></svg>1. félév</button>
+    <span id="semNav" class="semnav"></span>
   </nav>
   <label class="searchbox" for="q"><input id="q" type="search" placeholder="Keresés tárgyak, anyagok, dátumok között…" autocomplete="off" aria-label="Keresés"></label>
   <button type="button" class="themebtn" id="lockBtn" aria-label="Szerkesztés bekapcsolása" title="Szerkesztés">
@@ -450,25 +468,26 @@ const SCALE = [["0–59", "elégtelen (1)"], ["60–69", "elégséges (2)"], ["7
 
 function syllabusHtml(c) {
   const y = SYLLABUS[c.id];
-  if (!y) return `<div class="empty">Ide kerülnek a tárgy követelményei.</div>`;
-  const facts = [y.code && ["Neptun-kód", y.code], ["Kredit", y.credit], ["Felelős", y.owner], ["Tanszék", y.dept], ["Értékelés", y.eval]].filter(Boolean);
-  const total = sum(y.tasks, t => t[1]);
+  if (!y) return `<div class="empty">Még nincs tantárgyleírás.${canWrite ? " A „Tárgy szerkesztése” gombbal megadhatod, vagy betöltheted a tantárgyleírás Excelt." : ""}</div>`;
+  const facts = [["Neptun-kód", y.code], ["Kredit", y.credit], ["Felelős", y.owner], ["Tanszék", y.dept], ["Értékelés", y.eval]].filter(f => f[1] !== "" && f[1] != null);
+  const tasks = y.tasks || [], topics = y.topics || [], lit = y.lit || [];
+  const total = sum(tasks, t => Number(t[1]) || 0);
   return `<div class="syl">
-    <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
-    <p class="goal">${esc(y.goal)}</p>
-    <div class="panel"><h3>Számonkérések</h3>
-      <div class="parts">${y.tasks.map(([n, pts, form]) => `<div class="part"><span>${esc(n)}${form ? `<small>${esc(form)}</small>` : ""}</span><b>${pts} pont</b></div>`).join("")}
+    ${facts.length ? `<dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>` : ""}
+    ${y.goal ? `<p class="goal">${esc(y.goal)}</p>` : ""}
+    ${tasks.length ? `<div class="panel"><h3>Számonkérések</h3>
+      <div class="parts">${tasks.map(([n, pts, form]) => `<div class="part"><span>${esc(n)}${form ? `<small>${esc(form)}</small>` : ""}</span><b>${pts} pont</b></div>`).join("")}
         <div class="part sum"><span>Összesen</span><b>${total} pont</b></div></div>
       <ul class="rules">
         ${y.bonusMax ? `<li>Többletpont: legfeljebb <b>${y.bonusMax} pont</b> számít bele.</li>` : `<li>Többletpont nem szerezhető.</li>`}
         ${y.zhMin ? `<li>A ZH-k összpontszáma legalább <b>${y.zhMin} pont</b> legyen (${y.zhMax} pontból).</li>` : ""}
-        <li>Az elégségeshez a félév összpontszáma legalább <b>${y.totalMin} pont</b>.</li>
-        <li>${esc(y.retake || "ZH pótlása vizsgajelleggel lehetséges. Vizsgaidőszakban a félévközi pontok és többletpontok nem számítanak.")}</li>
+        <li>Az elégségeshez a félév összpontszáma legalább <b>${y.totalMin || 60} pont</b>.</li>
+        ${y.retake !== "-" ? `<li>${esc(y.retake || "ZH pótlása vizsgajelleggel lehetséges. Vizsgaidőszakban a félévközi pontok és többletpontok nem számítanak.")}</li>` : ""}
       </ul>
-    </div>
+    </div>` : ""}
     <div class="panel"><h3>Ponttáblázat</h3><div class="parts">${SCALE.map(([r, g]) => `<div class="part"><span>${g}</span><b>${r} pont</b></div>`).join("")}</div></div>
-    <details class="panel"><summary><h3>Ismeretkörök (${y.topics.length})</h3></summary><ol class="topics">${y.topics.map(t => `<li>${esc(t)}</li>`).join("")}</ol></details>
-    ${y.lit.length ? `<details class="panel"><summary><h3>Irodalom</h3></summary><ul class="topics">${y.lit.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
+    ${topics.length ? `<details class="panel"><summary><h3>Ismeretkörök (${topics.length})</h3></summary><ol class="topics">${topics.map(t => `<li>${esc(t)}</li>`).join("")}</ol></details>` : ""}
+    ${lit.length ? `<details class="panel"><summary><h3>Irodalom</h3></summary><ul class="topics">${lit.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
   </div>`;
 }
 
@@ -481,6 +500,8 @@ const WD = ["H","K","Sze","Cs","P","Szo","V"];
 const byId = Object.fromEntries(COURSES.map(c => [c.id, c]));
 /* A beírt eredmények a megosztott adatbázisban vannak (results/<tárgy>), a fenti adatok csak az alapértékek */
 const BASE = Object.fromEntries(COURSES.map(c => [c.id, JSON.parse(JSON.stringify({ parts: c.parts, bonus: c.bonus, grade: c.grade, status: c.status }))]));
+const BASE_COURSES = JSON.parse(JSON.stringify(COURSES));
+const BASE_SYLLABUS = JSON.parse(JSON.stringify(SYLLABUS));
 const GRADE_NAME = { 1: "elégtelen", 2: "elégséges", 3: "közepes", 4: "jó", 5: "jeles" };
 const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -567,14 +588,20 @@ function viewNaptar() {
       ${s?.pc != null ? `<span class="mini"><i style="width:${s.pc}%"></i></span>` : ""}
     </button>`;
   };
-  const tiles = COURSES.filter(c => (c.sem ?? 2) === 2).map(tile).join(""), tiles1 = COURSES.filter(c => c.sem === 1).map(tile).join("");
+  const sems = semesters();
+  const semSection = (n, i) => {
+    const list = COURSES.filter(c => (c.sem ?? 2) === n);
+    const head = `<div class="semhead"><p class="semester">${n}. félév</p>${canWrite ? `<button type="button" class="addev" data-newcourse="${n}">+ Új tárgy</button>` : ""}</div>`;
+    return `<section class="sect" id="felev${n}">${i === 0 ? `<div><h1>Tárgyak</h1>${head}</div>` : head}
+      ${list.length ? `<div class="grid">${list.map(tile).join("")}</div>` : `<div class="empty">Ebben a félévben még nincs tárgy.${canWrite ? " Az „+ Új tárgy” gombbal vehetsz fel egyet." : ""}</div>`}</section>`;
+  };
   return `<div class="stack">
     <div><h1>Naptár</h1><p class="lead">A félév ZH-i, vizsgái és beadandói egy helyen. Kattints egy tárgyra az anyagokért, a pontjaidért és a tanulóoldalért.</p></div>
     <section class="board" aria-label="Naptár és határidők">${calendar()}
       <div class="panel duepanel"><div class="duehead"><h2>${dayTitle}</h2><span class="dueacts">${state.day ? `<button type="button" id="clearday">Összes közelgő</button>` : ""}${canWrite ? `<button type="button" class="addev" data-evnew="">+ Új dátum</button>` : ""}</span></div><div class="dues">${dues}</div></div>
     </section>
-    <section class="sect" id="felev2"><div><h1>Tárgyak</h1><p class="semester">2. félév</p></div><div class="grid">${tiles}</div></section>
-    <section class="sect" id="felev1"><p class="semester">1. félév</p><div class="grid">${tiles1}</div></section>
+    ${sems.map(semSection).join("")}
+    ${canWrite ? `<div><button type="button" class="addsem" id="addSem">+ Új félév</button></div>` : ""}
   </div>`;
 }
 
@@ -618,7 +645,7 @@ function viewCourse(c) {
   }).join("");
   const evs = upcoming(c.id);
   return `<div class="stack" style="--h:${c.h}">
-    <section class="band"><button type="button" class="back" id="back">← Vissza a főoldalra</button><h1>${esc(c.name)}</h1>${c.status ? `<p class="lead" style="color:inherit">${esc(c.status)}</p>` : ""}</section>
+    <section class="band"><button type="button" class="back" id="back">← Vissza a főoldalra</button><h1>${esc(c.name)}</h1>${canWrite ? `<button type="button" class="bandedit" data-editcourse="${c.id}">✎ Tárgy szerkesztése</button>` : ""}${c.status ? `<p class="lead" style="color:inherit">${esc(c.status)}</p>` : ""}</section>
     ${c.grade >= 2 && !Object.keys(c.study || {}).length ? "" : `<div class="studies">${studies}</div>`}
     <div class="cols">
       <section class="sect"><h2>Tantárgyleírás</h2>${syllabusHtml(c)}</section>
@@ -740,7 +767,10 @@ function applyEvents() {
   const saved = Object.fromEntries(evDocs.map(d => [d.id, d.data()]));
   const ok = e => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || "") && byId[e.course] && e.title;
   const list = [];
+  const defs = STORE.courses || {};
+  for (const c of COURSES) if (defs[c.id]) c.parts.forEach((p, i) => { if (p.date) list.push({ id: `t:${c.id}:${i}`, course: c.id, title: p.name, date: p.date, time: p.time || "", note: "" }); });
   for (const b of BASE_EVENTS) {
+    if (defs[b.course]) continue;
     const d = saved[b.id];
     if (d?.deleted) continue;
     const e = d ? { ...b, ...d, id: b.id } : { ...b };
@@ -764,7 +794,11 @@ function drawEventDialog(err) {
   const e = evEditing;
   evDlg.innerHTML = `<form class="dlg" id="evForm" role="dialog" aria-modal="true" aria-labelledby="ev-h" novalidate>
     <h2 id="ev-h">${e.id ? "Dátum módosítása" : "Új dátum"}</h2>
-    <label class="fld" for="ev-course"><span>Tárgy</span><select id="ev-course">${COURSES.map(c => `<option value="${c.id}"${c.id === e.course ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+    <label class="fld" for="ev-course"><span>Tárgy</span><select id="ev-course">${COURSES.map(c => `<option value="${c.id}"${c.id === e.course ? " selected" : ""}>${esc(c.name)}</option>`).join("")}<option value="__new">+ Új tárgy…</option></select></label>
+    <div class="fldrow" id="ev-newwrap" hidden>
+      <label class="fld" for="ev-newname"><span>Új tárgy neve</span><input id="ev-newname" type="text" autocomplete="off"></label>
+      <label class="fld" for="ev-newsem"><span>Félév</span><select id="ev-newsem">${semesters().map(n => `<option value="${n}">${n}. félév</option>`).join("")}</select></label>
+    </div>
     <label class="fld" for="ev-title"><span>Megnevezés</span><input id="ev-title" type="text" list="ev-kinds" value="${esc(e.title)}" placeholder="pl. II. ZH, Beadandó, Vizsga" autocomplete="off"></label>
     <datalist id="ev-kinds"><option value="I. ZH"><option value="II. ZH"><option value="Teszt"><option value="Beadandó leadása"><option value="Vizsga"><option value="Pótzh"></datalist>
     <div class="fldrow">
@@ -783,10 +817,16 @@ function drawEventDialog(err) {
 async function saveEvent() {
   const v = id => document.getElementById(id).value.trim();
   const body = { course: v("ev-course"), title: v("ev-title"), date: v("ev-date"), time: v("ev-time"), note: v("ev-note") };
+  if (body.course === "__new" && !v("ev-newname")) return drawEventDialog("Add meg az új tárgy nevét.");
   if (!body.title) return drawEventDialog("Adj meg egy megnevezést, például II. ZH.");
   if (!/^\d{4}-\d{2}-\d{2}$/.test(body.date)) return drawEventDialog("Válassz dátumot.");
   const btn = evDlg.querySelector(".savebtn"); btn.disabled = true; btn.textContent = "Mentés…";
   try {
+    if (body.course === "__new") {
+      const cid = "c" + Date.now().toString(36);
+      await dbApi.doc("courses/" + cid).set({ name: v("ev-newname"), sem: Number(v("ev-newsem")) || semesters()[0], h: pickHue(), tasks: [], topics: [], lit: [], study: [], totalMin: 60 });
+      body.course = cid;
+    }
     const ref = evEditing.id ? dbApi.doc("events/" + evEditing.id) : dbApi.doc("events/n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
     await ref.set(body);
     const d = parse(body.date); state.month = new Date(d.getFullYear(), d.getMonth(), 1);
@@ -809,14 +849,245 @@ evDlg.addEventListener("click", ev => {
 });
 document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !evDlg.hidden) closeEvent(); });
 
+
+/* ===== Tárgyak felvétele és szerkesztése =====
+   A tárgyak adatai a data.json "courses" részében vannak; a beépített tárgyak ugyanígy felülírhatók. */
+const HUES = [225, 150, 28, 285, 190, 345, 55, 5, 265, 120, 205, 95, 320, 170, 40];
+const pickHue = () => HUES.find(h => !COURSES.some(c => c.h === h)) ?? HUES[COURSES.length % HUES.length];
+const ROMAN = ["I", "II", "III", "IV", "V"];
+const numOrNull = v => { const x = Number(String(v ?? "").replace(",", ".")); return String(v ?? "").trim() === "" || !Number.isFinite(x) ? null : x; };
+function semesters() {
+  const set = new Set(COURSES.map(c => c.sem ?? 2));
+  (STORE.meta?.semesters?.list || []).forEach(n => set.add(n));
+  if (!set.size) set.add(1);
+  return [...set].sort((a, b) => b - a);
+}
+function fromDef(id, d, b) {
+  const old = n => b?.parts.find(p => p.name === n);
+  return {
+    id, name: d.name, sem: Number(d.sem) || 1, h: d.h ?? b?.h ?? 225,
+    parts: (d.tasks || []).filter(t => t.name).map(t => ({ name: t.name, date: t.date || null, time: t.time || "", max: numOrNull(t.max), score: old(t.name)?.score ?? null })),
+    bonus: numOrNull(d.bonusMax) ? { max: numOrNull(d.bonusMax), score: b?.bonus?.score ?? 0 } : null,
+    need: null, grade: null, status: "",
+    study: Object.fromEntries((d.study || []).filter(x => x.name && x.url).map(x => [x.name, { url: x.url, desc: x.desc || "" }])),
+    materials: [], custom: !b,
+  };
+}
+function sylFromDef(d) {
+  const tasks = (d.tasks || []).filter(t => t.name).map(t => [t.name, numOrNull(t.max) ?? 0, t.form || ""]);
+  return { code: d.code || "", credit: d.credit ?? "", owner: d.owner || "", dept: d.dept || "", eval: d.eval || "", goal: d.goal || "",
+    tasks, bonusMax: numOrNull(d.bonusMax), zhMin: numOrNull(d.zhMin), zhMax: sum(tasks.filter(t => /ZH|Vizsga/.test(t[0])), t => t[1]),
+    totalMin: numOrNull(d.totalMin) ?? 60, retake: d.retake || "", topics: d.topics || [], lit: d.lit || [] };
+}
+function applyCourses() {
+  const defs = STORE.courses || {};
+  COURSES.length = 0;
+  for (const b of BASE_COURSES) {
+    const d = defs[b.id];
+    if (d?.hidden) continue;
+    COURSES.push(d?.name ? fromDef(b.id, d, b) : JSON.parse(JSON.stringify(b)));
+  }
+  for (const [id, d] of Object.entries(defs)) if (!BASE_COURSES.some(b => b.id === id) && !d.hidden && d.name) COURSES.push(fromDef(id, d));
+  for (const k of Object.keys(byId)) delete byId[k];
+  COURSES.forEach(c => { byId[c.id] = c; });
+  for (const k of Object.keys(SYLLABUS)) delete SYLLABUS[k];
+  Object.assign(SYLLABUS, JSON.parse(JSON.stringify(BASE_SYLLABUS)));
+  for (const [id, d] of Object.entries(defs)) if (!d.hidden && d.name) SYLLABUS[id] = sylFromDef(d);
+  for (const k of Object.keys(BASE)) delete BASE[k];
+  COURSES.forEach(c => { BASE[c.id] = JSON.parse(JSON.stringify({ parts: c.parts, bonus: c.bonus, grade: c.grade, status: c.status })); });
+}
+/* A szerkesztőbe a tárgy jelenlegi adatai kerülnek */
+function courseDef(id) {
+  const c = byId[id], y = SYLLABUS[id] || {};
+  const formOf = n => (y.tasks || []).find(t => t[0] === n || t[0].startsWith(n))?.[2] || "";
+  const timeOf = p => p.time || BASE_EVENTS.find(e => e.course === id && e.date === p.date)?.time || "";
+  return { name: c.name, sem: c.sem ?? 2, h: c.h, code: y.code || "", credit: y.credit ?? "", owner: y.owner || "", dept: y.dept || "",
+    eval: y.eval || "", goal: y.goal || "",
+    tasks: c.parts.map(p => ({ name: p.name, max: p.max ?? "", date: p.date || "", time: timeOf(p), form: formOf(p.name) })),
+    bonusMax: y.bonusMax ?? c.bonus?.max ?? "", zhMin: y.zhMin ?? "", totalMin: y.totalMin ?? 60, retake: y.retake || "",
+    topics: y.topics || [], lit: y.lit || [],
+    study: Object.entries(c.study || {}).map(([k, v]) => ({ name: k, url: v.url, desc: v.desc || "" })) };
+}
+let coId = null, coDraft = null, coDelArmed = false, coNote = "";
+function openCourse(id, sem) {
+  coId = id || null; coDelArmed = false; coNote = "";
+  coDraft = id ? courseDef(id)
+    : { name: "", sem: Number(sem) || semesters()[0], h: pickHue(), code: "", credit: "", owner: "", dept: "", eval: "Kollokvium", goal: "",
+        tasks: [{ name: "I. ZH", max: "", date: "", time: "", form: "" }, { name: "II. ZH", max: "", date: "", time: "", form: "" }],
+        bonusMax: "", zhMin: "", totalMin: 60, retake: "", topics: [], lit: [], study: [] };
+  drawCourseDialog("");
+  evDlg.hidden = false;
+  document.getElementById(id ? "co-name" : "co-xlsx")?.focus();
+}
+const fldIn = (id, label, val, attrs = "") => `<label class="fld" for="${id}"><span>${label}</span><input id="${id}" type="text" value="${esc(val ?? "")}" autocomplete="off" ${attrs}></label>`;
+function drawCourseDialog(err) {
+  const d = coDraft, sems = semesters(), next = Math.max(...sems) + 1;
+  evDlg.innerHTML = `<form class="dlg wide" id="coForm" role="dialog" aria-modal="true" aria-labelledby="co-h" novalidate>
+    <h2 id="co-h">${coId ? "Tárgy szerkesztése" : "Új tárgy"}</h2>
+    <div class="importbox">
+      <label class="fld" for="co-xlsx"><span>Tantárgyleírás Excel betöltése (BGE-sablon): kitölti az alábbi mezőket</span><input id="co-xlsx" type="file" accept=".xlsx,.xls"></label>
+      <p class="formhint" id="co-xstatus">${esc(coNote || "Nem kötelező. Ami üresen marad, az nem jelenik meg a tárgy oldalán; később bármikor szerkesztheted.")}</p>
+    </div>
+    <div class="fldgrid">
+      ${fldIn("co-name", "Tárgy neve *", d.name, 'placeholder="pl. Fogyasztói magatartás"')}
+      <label class="fld" for="co-sem"><span>Félév</span><select id="co-sem">${sems.map(n => `<option value="${n}"${n === d.sem ? " selected" : ""}>${n}. félév</option>`).join("")}<option value="${next}"${d.sem === next ? " selected" : ""}>${next}. félév (új)</option></select></label>
+      ${fldIn("co-code", "Neptun-kód", d.code)}
+      ${fldIn("co-credit", "Kredit", d.credit, 'inputmode="numeric"')}
+      ${fldIn("co-owner", "Tanár / tárgyfelelős", d.owner)}
+      ${fldIn("co-dept", "Tanszék", d.dept)}
+      ${fldIn("co-eval", "Értékelés módja", d.eval, 'placeholder="pl. Kollokvium, Gyakorlati jegy"')}
+    </div>
+    <label class="fld" for="co-goal"><span>A tárgy célja</span><textarea id="co-goal">${esc(d.goal)}</textarea></label>
+    <h3>Számonkérések</h3>
+    <div class="rowlist">${d.tasks.map((t, i) => `<div class="taskrow">
+      ${fldIn(`co-tn${i}`, "Megnevezés", t.name, 'list="ev-kinds2"')}${fldIn(`co-tm${i}`, "Max. pont", t.max, 'inputmode="decimal"')}
+      <label class="fld" for="co-td${i}"><span>Dátum</span><input id="co-td${i}" type="date" value="${esc(t.date)}"></label>
+      ${fldIn(`co-tt${i}`, "Időpont", t.time, 'placeholder="12:05–12:35"')}${fldIn(`co-tf${i}`, "Forma / megjegyzés", t.form, 'placeholder="pl. Vizsgaközponti (VK)"')}
+      <button type="button" class="rowdel" data-delrow="tasks:${i}" aria-label="Sor törlése">✕</button></div>`).join("")}
+      <datalist id="ev-kinds2"><option value="I. ZH"><option value="II. ZH"><option value="Teszt"><option value="Beadandó"><option value="Vizsga"></datalist>
+      <button type="button" class="addrow" data-addrow="tasks">+ Számonkérés</button></div>
+    <div class="fldgrid">
+      ${fldIn("co-bonus", "Plusz pont (max.)", d.bonusMax, 'inputmode="decimal"')}
+      ${fldIn("co-zhmin", "ZH-minimum (pont)", d.zhMin, 'inputmode="decimal"')}
+      ${fldIn("co-total", "Elégségeshez kell (pont)", d.totalMin, 'inputmode="decimal"')}
+    </div>
+    ${fldIn("co-retake", "Pótlás / egyéb szabály", d.retake, 'placeholder="pl. ZH pótolható vizsgajelleggel"')}
+    <label class="fld" for="co-topics"><span>Ismeretkörök (soronként egy)</span><textarea id="co-topics">${esc(d.topics.join("\n"))}</textarea></label>
+    <label class="fld" for="co-lit"><span>Irodalom (soronként egy)</span><textarea id="co-lit">${esc(d.lit.join("\n"))}</textarea></label>
+    <h3>Tanulóoldalak</h3>
+    <div class="rowlist">${d.study.map((x, i) => `<div class="studyrow">
+      ${fldIn(`co-sn${i}`, "Melyikhez", x.name, 'placeholder="pl. I. ZH"')}${fldIn(`co-su${i}`, "Link", x.url, 'placeholder="https://…" inputmode="url"')}
+      <button type="button" class="rowdel" data-delrow="study:${i}" aria-label="Sor törlése">✕</button></div>`).join("")}
+      <button type="button" class="addrow" data-addrow="study">+ Tanulóoldal</button></div>
+    ${err ? `<p class="formerr" role="alert">${esc(err)}</p>` : ""}
+    <div class="formbtns">
+      <button type="submit" class="savebtn">Mentés</button>
+      <button type="button" class="cancelbtn" id="evCancel">Mégse</button>
+      ${coId ? `<button type="button" class="delbtn" id="coDel">${coDelArmed ? "Biztosan törlöd a tárgyat? Kattints újra" : "Tárgy törlése"}</button>` : ""}
+    </div>
+  </form>`;
+}
+function collectCourse() {
+  const v = id => document.getElementById(id)?.value.trim() ?? "";
+  const d = coDraft;
+  d.name = v("co-name"); d.sem = Number(v("co-sem")) || d.sem; d.code = v("co-code"); d.credit = v("co-credit");
+  d.owner = v("co-owner"); d.dept = v("co-dept"); d.eval = v("co-eval"); d.goal = v("co-goal");
+  d.tasks = d.tasks.map((t, i) => ({ name: v(`co-tn${i}`), max: v(`co-tm${i}`), date: v(`co-td${i}`), time: v(`co-tt${i}`), form: v(`co-tf${i}`) }));
+  d.bonusMax = v("co-bonus"); d.zhMin = v("co-zhmin"); d.totalMin = v("co-total"); d.retake = v("co-retake");
+  d.topics = v("co-topics").split("\n").map(x => x.trim()).filter(Boolean);
+  d.lit = v("co-lit").split("\n").map(x => x.trim()).filter(Boolean);
+  d.study = d.study.map((x, i) => ({ name: v(`co-sn${i}`), url: v(`co-su${i}`), desc: x.desc || "" }));
+}
+async function saveCourse() {
+  collectCourse();
+  const d = coDraft;
+  if (!d.name) return drawCourseDialog("Add meg a tárgy nevét.");
+  for (const t of d.tasks) if (t.name && t.max !== "" && numOrNull(t.max) == null) return drawCourseDialog(`${t.name}: a maximális pont legyen szám.`);
+  for (const x of d.study) if (x.url && !/^https?:\/\//.test(x.url)) return drawCourseDialog("A tanulóoldal linkje https://-sel kezdődjön.");
+  const body = { ...d, tasks: d.tasks.filter(t => t.name), study: d.study.filter(x => x.name && x.url) };
+  const id = coId || "c" + Date.now().toString(36);
+  const btn = evDlg.querySelector(".savebtn"); btn.disabled = true; btn.textContent = "Mentés…";
+  try {
+    await dbApi.doc("courses/" + id).set(body);
+    closeEvent();
+    if (!coId) go("targy", id); else render();
+  } catch { drawCourseDialog("A mentés nem sikerült, próbáld újra."); }
+}
+async function deleteCourse() {
+  if (!coDelArmed) { collectCourse(); coDelArmed = true; return drawCourseDialog(""); }
+  try {
+    if (BASE_COURSES.some(b => b.id === coId)) await dbApi.doc("courses/" + coId).set({ hidden: true, name: coDraft.name });
+    else await dbApi.doc("courses/" + coId).delete();
+    closeEvent(); go("naptar");
+  } catch { coDelArmed = false; drawCourseDialog("A törlés nem sikerült, próbáld újra."); }
+}
+async function addSemester() {
+  const n = Math.max(...semesters()) + 1, list = [...new Set([...(STORE.meta?.semesters?.list || []), n])];
+  try { await dbApi.doc("meta/semesters").set({ list }); toSemester("felev" + n); } catch {}
+}
+
+/* ----- BGE tantárgyleírás-Excel beolvasása (SheetJS) ----- */
+let xlsxLib = null;
+function loadXlsx() {
+  return xlsxLib ??= new Promise((ok, bad) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+    sc.onload = () => ok(window.XLSX); sc.onerror = () => { xlsxLib = null; bad(new Error("xlsx")); };
+    document.head.appendChild(sc);
+  });
+}
+function parseBGE(XLSX, wb) {
+  const rows = ws => XLSX.utils.sheet_to_json(ws, { header: 1, blankrows: false, defval: "" }).map(r => {
+    const out = []; for (const v of r) { const t = String(v).replace(/\s+/g, " ").trim(); if (t && out[out.length - 1] !== t) out.push(t); } return out;
+  }).filter(r => r.length);
+  const [s1 = [], s2 = [], s3 = []] = wb.SheetNames.slice(0, 3).map(n => rows(wb.Sheets[n]));
+  const val = (sh, label) => { const r = sh.find(r => r[0].includes(label)); return r && r.length > 1 ? r[r.length - 1] : ""; };
+  const after = (sh, start, stop) => { const i = sh.findIndex(r => r[0].startsWith(start)); if (i < 0) return []; const out = [];
+    for (const r of sh.slice(i + 1)) { if (stop.some(x => r[0].startsWith(x))) break; out.push(r); } return out; };
+  const d = {};
+  d.name = (val(s1, "Tantárgy neve:") || val(s2, "Tantárgy neve:")).replace(/\s*\((új|kifutó|GT|MSc)\)\s*$/i, "");
+  d.code = val(s1, "Neptun-kód") || val(s2, "Neptunkód") || val(s3, "Neptun-kód");
+  d.credit = val(s1, "kreditértéke"); d.owner = val(s1, "Tantárgy felelőse"); d.dept = val(s1, "szervezeti egysége");
+  d.eval = val(s1, "Értékelés típusa");
+  d.goal = after(s2, "A tantárgy tanítási célja", ["Ismeretkörök"]).map(r => r.join(" ")).join(" ");
+  d.topics = after(s2, "Ismeretkörök", ["Kötelező irodalom"]).filter(r => /^\d+\.$/.test(r[0]) && r.length > 1).map(r => r.slice(1).join(" "));
+  d.lit = after(s2, "Kötelező irodalom", ["~"]).map(r => r.join(" · "));
+  const tasks = [];
+  const iTask = s3.findIndex(r => r[0].startsWith("Félévközi tanórán kívüli") && r.includes("Meghatározás"));
+  const iZh = s3.findIndex(r => r[0] === "Zárthelyi dolgozat" && r.includes("Pontszám"));
+  const take = (from, kind) => { if (from < 0) return; for (const r of s3.slice(from + 1)) { if (!/^\d+\.$/.test(r[0])) break;
+    const pts = numOrNull(r[2]); if (r.length < 3 || pts == null) continue;
+    const n = parseInt(r[0], 10);
+    if (kind === "zh") tasks.push({ name: `${ROMAN[n - 1] || n}. ZH`, max: pts, date: "", time: "", form: r[3] || "" });
+    else tasks.push({ name: r[1].charAt(0).toUpperCase() + r[1].slice(1), max: pts, date: "", time: "", form: r[3] ? `Határidő: ${r[3]}` : "" }); } };
+  take(iZh, "zh"); take(iTask, "task");
+  d.tasks = tasks;
+  d.bonusMax = numOrNull(val(s3, "maximális többletpontszám")) ?? "";
+  d.zhMin = numOrNull(val(s3, "Zárthelyi dolgozati összpontszám minimuma")) || "";
+  d.totalMin = numOrNull(val(s3, "Féléves összpontszám minimuma")) ?? 60;
+  return d;
+}
+async function importExcel(file) {
+  collectCourse();
+  const st = document.getElementById("co-xstatus"); if (st) st.textContent = "Beolvasás…";
+  try {
+    const XLSX = await loadXlsx();
+    const wb = XLSX.read(await file.arrayBuffer(), { type: "array" });
+    const x = parseBGE(XLSX, wb), d = coDraft;
+    for (const k of ["name", "code", "credit", "owner", "dept", "eval", "goal"]) if (x[k]) d[k] = x[k];
+    if (x.tasks.length) d.tasks = x.tasks.map(t => ({ ...t, date: d.tasks.find(o => o.name === t.name)?.date || "", time: d.tasks.find(o => o.name === t.name)?.time || "" }));
+    if (x.topics.length) d.topics = x.topics;
+    if (x.lit.length) d.lit = x.lit;
+    if (x.bonusMax !== "") d.bonusMax = x.bonusMax;
+    if (x.zhMin !== "") d.zhMin = x.zhMin;
+    d.totalMin = x.totalMin;
+    coNote = x.name || x.tasks.length
+      ? `Beolvasva: ${x.name || "név nélkül"}, ${x.tasks.length} számonkérés, ${x.topics.length} ismeretkör. Nézd át, és add meg a dátumokat.`
+      : "Ebben a fájlban nem találtam a BGE-sablon mezőit. Töltsd ki kézzel a fontos adatokat.";
+  } catch { coNote = "A fájlt nem sikerült beolvasni. Töltsd ki kézzel a mezőket."; }
+  drawCourseDialog("");
+}
+evDlg.addEventListener("submit", ev => { if (ev.target.id !== "coForm") return; ev.preventDefault(); saveCourse(); });
+evDlg.addEventListener("change", ev => {
+  if (ev.target.id === "co-xlsx" && ev.target.files?.[0]) importExcel(ev.target.files[0]);
+  if (ev.target.id === "ev-course") document.getElementById("ev-newwrap").hidden = ev.target.value !== "__new";
+});
+evDlg.addEventListener("click", ev => {
+  const add = ev.target.closest("[data-addrow]"), del = ev.target.closest("[data-delrow]");
+  if (add) { collectCourse(); const k = add.dataset.addrow;
+    coDraft[k].push(k === "tasks" ? { name: "", max: "", date: "", time: "", form: "" } : { name: "", url: "", desc: "" }); return drawCourseDialog(""); }
+  if (del) { collectCourse(); const [k, i] = del.dataset.delrow.split(":"); coDraft[k].splice(+i, 1); return drawCourseDialog(""); }
+  if (ev.target.id === "coDel") deleteCourse();
+});
+
 /* ===== Tárolás a GitHubon: az eredmények és a dátumok a repó data.json fájljában vannak =====
    Olvasni bárki tud; írni az tud, aki ezen a gépen megadta a saját GitHub-tokenjét (csak ebben a böngészőben marad). */
 const GH = { owner: "kittijakab19", repo: "marketing-mesterkepzes", path: "data.json", branch: "main" };
 const GH_API = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
-let STORE = { results: {}, events: {} }, ghSha = null, ghToken = null;
+let STORE = { results: {}, events: {}, courses: {}, meta: {} }, ghSha = null, ghToken = null;
 try { ghToken = localStorage.getItem("mm-gh-token"); } catch {}
 const toDocs = col => Object.entries(STORE[col] || {}).map(([id, d]) => ({ id, data: () => d }));
-function refreshAll() { applyResults(toDocs("results")); evDocs = toDocs("events"); applyEvents(); if (!editing) render(); }
+function refreshAll() { applyCourses(); applyResults(toDocs("results")); evDocs = toDocs("events"); applyEvents(); if (!editing) render(); }
 const b64enc = str => { let b = ""; new TextEncoder().encode(str).forEach(x => { b += String.fromCharCode(x); }); return btoa(b); };
 const b64dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, "")), ch => ch.charCodeAt(0)));
 const ghHeaders = () => ({ Accept: "application/vnd.github+json", Authorization: "Bearer " + ghToken });
@@ -846,6 +1117,7 @@ const ghDb = {
   doc(path) {
     const [col, id] = path.split("/");
     const write = async (next, note) => {
+      STORE[col] = STORE[col] || {};
       const prev = STORE[col][id];
       if (next === undefined) delete STORE[col][id]; else STORE[col][id] = next;
       try { await ghSave(note); }
@@ -856,12 +1128,13 @@ const ghDb = {
       }
       refreshAll();
     };
-    return { set: body => write(body, `${col === "results" ? "Eredmények" : "Naptár"}: ${byId[body.course]?.name || byId[id]?.name || id}`), delete: () => write(undefined, `Naptár: dátum törölve (${id})`) };
+    const label = { results: "Eredmények", events: "Naptár", courses: "Tárgy", meta: "Félévek" }[col] || col;
+    return { set: body => write(body, `${label}: ${body.name || byId[body.course]?.name || byId[id]?.name || id}`), delete: () => write(undefined, `${label}: törölve (${id})`) };
   },
 };
 async function reloadStore() {
   const data = await ghLoad();
-  STORE = { results: data.results || {}, events: data.events || {} };
+  STORE = { results: data.results || {}, events: data.events || {}, courses: data.courses || {}, meta: data.meta || {} };
   refreshAll();
 }
 async function checkToken(t) {
@@ -924,6 +1197,9 @@ function render() {
   app.innerHTML = c ? viewCourse(c) : state.view === "kereses" ? viewKereses() : viewNaptar();
   document.getElementById("nav-naptar").setAttribute("aria-current", state.view === "naptar");
   document.getElementById("nav-kereses").setAttribute("aria-current", state.view === "kereses");
+  const semIcon = `<svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"/></svg>`;
+  document.getElementById("semNav").innerHTML = semesters().map((n, i) =>
+    `<button type="button" data-sem="${n}" style="--h:${[28, 55, 120, 205, 320][i % 5]}">${semIcon}${n}. félév</button>`).join("");
 }
 
 function go(view, course) {
@@ -940,8 +1216,12 @@ app.addEventListener("submit", ev => {
   saveResults(byId[ev.target.dataset.course]);
 });
 app.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
+  const t = ev.target.closest("[data-newcourse],[data-editcourse],#addSem,[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
   if (!t) return;
+  if (t.dataset.newcourse) return openCourse(null, t.dataset.newcourse);
+  if (t.dataset.editcourse) return openCourse(t.dataset.editcourse);
+  if (t.id === "addSem") return addSemester();
+  if (t.dataset.evedit?.startsWith("t:")) return openCourse(t.dataset.evedit.split(":")[1]);
   if (t.dataset.evedit) return openEvent(t.dataset.evedit);
   if (t.dataset.evnew !== undefined) return openEvent(null, t.dataset.evnew);
   if (t.dataset.edit) { editing = t.dataset.edit; editError = ""; render(); return document.getElementById("ed-p0")?.focus(); }
@@ -957,8 +1237,7 @@ document.getElementById("brand").onclick = () => go("naptar");
 document.getElementById("nav-naptar").onclick = () => go("naptar");
 const toSemester = id => { go("naptar"); try { history.replaceState(null, "", "#" + id); } catch {}
   document.getElementById(id)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); };
-document.getElementById("nav-felev2").onclick = () => toSemester("felev2");
-document.getElementById("nav-felev1").onclick = () => toSemester("felev1");
+document.getElementById("semNav").onclick = ev => { const b = ev.target.closest("[data-sem]"); if (b) toSemester("felev" + b.dataset.sem); };
 document.getElementById("nav-kereses").onclick = () => { go("kereses"); q.focus(); };
 q.addEventListener("input", () => { if (state.view !== "kereses") { state.view = "kereses"; try { history.replaceState(null, "", "#kereses"); } catch {} } render(); });
 
@@ -975,6 +1254,6 @@ const h = location.hash.slice(1);
 if (byId[h]) { state.view = "targy"; state.course = h; } else if (h === "kereses") state.view = "kereses";
 setGrades();
 render();
-if (h === "felev2" || h === "felev1") document.getElementById(h)?.scrollIntoView();
+if (/^felev\d+$/.test(h)) document.getElementById(h)?.scrollIntoView();
 initResults();
 </script>

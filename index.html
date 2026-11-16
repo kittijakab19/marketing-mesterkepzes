@@ -557,8 +557,8 @@ function viewNaptar() {
     : `<div class="empty">${EVENTS.length ? "Erre nincs esemény." : "Még nincsenek dátumok felvéve. Amint megadod a ZH-k, beadandók és vizsgák időpontjait, itt és a naptárban is megjelennek."}</div>`;
   const tile = c => {
     const nx = upcoming(c.id)[0], s = stats(c);
-    const chip = c.grade != null ? "Teljesítve" : nx ? `${esc(nx.title)} · ${leftLabel(daysLeft(nx.date))}` : "";
-    return `<button class="tile${c.grade != null ? " done" : ""}" type="button" style="--h:${c.h}" data-course="${c.id}">
+    const chip = c.grade >= 2 ? "Teljesítve" : c.grade === 1 ? "Elégtelen" : nx ? `${esc(nx.title)} · ${leftLabel(daysLeft(nx.date))}` : "";
+    return `<button class="tile${c.grade >= 2 ? " done" : ""}" type="button" style="--h:${c.h}" data-course="${c.id}">
       <b>${esc(c.name)}</b>
       ${c.grade != null ? `<span class="gradebig" aria-label="Jegy: ${c.grade}"><small>Jegy</small>${c.grade}</span>` : ""}
       ${chip ? `<span class="next">${chip}</span>` : ""}
@@ -619,7 +619,7 @@ function viewCourse(c) {
   const evs = upcoming(c.id);
   return `<div class="stack" style="--h:${c.h}">
     <section class="band"><button type="button" class="back" id="back">← Vissza a főoldalra</button><h1>${esc(c.name)}</h1>${c.status ? `<p class="lead" style="color:inherit">${esc(c.status)}</p>` : ""}</section>
-    ${c.grade != null && !Object.keys(c.study || {}).length ? "" : `<div class="studies">${studies}</div>`}
+    ${c.grade >= 2 && !Object.keys(c.study || {}).length ? "" : `<div class="studies">${studies}</div>`}
     <div class="cols">
       <section class="sect"><h2>Tantárgyleírás</h2>${syllabusHtml(c)}</section>
       <aside class="side">
@@ -667,12 +667,26 @@ function applyResults(docs) {
       if (c.bonus) c.bonus.score = d.bonus ?? 0;
       else if (d.bonus != null) c.bonus = { max: SYLLABUS[c.id]?.bonusMax ?? d.bonus, score: d.bonus };
     }
-    if ("grade" in d) {
-      c.grade = d.grade;
-      c.status = d.grade >= 2 ? `Teljesítve, ${GRADE_NAME[d.grade]} (${d.grade}) érdemjeggyel.` : d.grade === 1 ? "Elégtelen (1) érdemjegy." : "";
-    }
+  }
+  setGrades();
+}
+/* Érdemjegy: ha minden számonkérés pontja megvan, a jegyhatárokból (és a ZH-minimumból) számolódik */
+function autoGrade(c) {
+  const s = stats(c);
+  if (!s || s.left > 0 || !s.max) return null;
+  const zhMin = SYLLABUS[c.id]?.zhMin;
+  if (zhMin && sum(c.parts.filter(p => /ZH|Vizsga/.test(p.name)), p => p.score) < zhMin) return 1;
+  const pc = s.total / s.max * 100;
+  return pc >= 89.5 ? 5 : pc >= 79.5 ? 4 : pc >= 69.5 ? 3 : pc >= 59.5 ? 2 : 1;
+}
+function setGrades() {
+  for (const c of COURSES) {
+    c.grade = autoGrade(c);
+    c.status = c.grade >= 2 ? `Teljesítve, ${GRADE_NAME[c.grade]} (${c.grade}) érdemjeggyel.`
+      : c.grade === 1 ? "A beírt pontok alapján elégtelen (1). A ZH vizsgajelleggel pótolható." : "";
   }
 }
+
 function dbNote() {
   if (dbState === "stale") return `<p class="dbnote">A mentett eredmények most nem érhetők el, az oldal a legutóbb ismert pontokat mutatja.</p>`;
   if (dbState === "error") return `<p class="dbnote">A mentett eredmények nem tölthetők be. Frissítsd később az oldalt.</p>`;
@@ -685,9 +699,7 @@ function editForm(c) {
   return `<form class="editform" id="editForm" data-course="${c.id}" novalidate>
     ${c.parts.map((p, i) => numIn(`ed-p${i}`, p.score, p.max, esc(p.name))).join("")}
     ${bonusMax ? numIn("ed-bonus", c.bonus?.score ?? null, bonusMax, "Plusz pont") : ""}
-    <label class="numrow" for="ed-grade"><span>Érdemjegy</span>
-      <select id="ed-grade"><option value="">még nincs</option>${[5, 4, 3, 2, 1].map(g => `<option value="${g}"${c.grade === g ? " selected" : ""}>${GRADE_NAME[g]} (${g})</option>`).join("")}</select></label>
-    <p class="formhint">Hagyd üresen, amit még nem írtál meg. Tizedesvesszővel is beírhatod, például 35,5.</p>
+    <p class="formhint">Hagyd üresen, amit még nem írtál meg. Tizedesvesszővel is beírhatod, például 35,5. Ha minden pont be van írva, a jegyet az oldal számolja ki a jegyhatárok alapján.</p>
     ${editError ? `<p class="formerr" role="alert">${esc(editError)}</p>` : ""}
     <div class="formbtns"><button type="submit" class="savebtn">Mentés</button><button type="button" class="cancelbtn" id="editCancel">Mégse</button></div>
   </form>`;
@@ -711,8 +723,6 @@ async function saveResults(c) {
     if (r.err) { editError = `Plusz pont: 0 és ${fmt(max)} közötti számot írj be.`; return render(); }
     body.bonus = r.v;
   }
-  const g = document.getElementById("ed-grade").value;
-  body.grade = g ? Number(g) : null;
   const btn = document.querySelector("#editForm .savebtn"); if (btn) { btn.disabled = true; btn.textContent = "Mentés…"; }
   try {
     await dbApi.doc("results/" + c.id).set(body);
@@ -963,6 +973,7 @@ document.getElementById("themeBtn").onclick = () => setTheme(isDark() ? "light" 
 
 const h = location.hash.slice(1);
 if (byId[h]) { state.view = "targy"; state.course = h; } else if (h === "kereses") state.view = "kereses";
+setGrades();
 render();
 if (h === "felev2" || h === "felev1") document.getElementById(h)?.scrollIntoView();
 initResults();

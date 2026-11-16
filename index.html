@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Marketing mesterképzés</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: pastel course tiles under a calm top bar, with a month calendar pinned beside the upcoming dates. */
+:root {
+  --bg: #f5f6fb; --panel: #ffffff; --line: #e5e7f2; --fg: #2b2f45; --muted: #666b86;
+  --accent: #c9d3fb; --accent-fg: #2b2f45; --accent-strong: #3f4f9c; --accent-soft: #e9edfd;
+  --mark: #fde9a8; --mark-fg: #2b2f45; --warn: #9c4a34; --warn-soft: #fde3da;
+  --tile-s: 72%; --tile-l: 90%; --tile-deep: 82%; --tag-l: 97%;
+  --shadow: 0 1px 2px rgba(60, 66, 110, .05), 0 10px 26px rgba(60, 66, 110, .07);
+  --body: "Nunito", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #171a24; --panel: #202431; --line: #333849; --fg: #eceef7; --muted: #a9aec5;
+  --accent: #4a5690; --accent-fg: #eceef7; --accent-strong: #b9c6f5; --accent-soft: #2c3350;
+  --mark: #6b5a22; --mark-fg: #fff3cf; --warn: #f0b3a0; --warn-soft: #4a2f2a;
+  --tile-s: 30%; --tile-l: 27%; --tile-deep: 34%; --tag-l: 20%;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 26px rgba(0, 0, 0, .25); color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #171a24; --panel: #202431; --line: #333849; --fg: #eceef7; --muted: #a9aec5;
+  --accent: #4a5690; --accent-fg: #eceef7; --accent-strong: #b9c6f5; --accent-soft: #2c3350;
+  --mark: #6b5a22; --mark-fg: #fff3cf; --warn: #f0b3a0; --warn-soft: #4a2f2a;
+  --tile-s: 30%; --tile-l: 27%; --tile-deep: 34%; --tag-l: 20%;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 26px rgba(0, 0, 0, .25); color-scheme: dark }
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font: 16px/1.5 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; text-align: left; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+h1, h2, h3 { font-weight: 800; line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: 2.1rem; letter-spacing: -.01em; } h2 { font-size: 1.25rem; } h3 { font-size: 1.02rem; }
+mark { background: var(--mark); color: var(--mark-fg); border-radius: 3px; padding: 0 2px; }
+.muted { color: var(--muted); }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--panel); box-shadow: 0 1px 0 var(--line);
+  padding-block: 12px; padding-left: max(clamp(16px, 3.5vw, 48px), env(safe-area-inset-left, 0px)); padding-right: max(clamp(16px, 3.5vw, 48px), env(safe-area-inset-right, 0px));
+  display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.brand { font-weight: 800; font-size: 1.08rem; }
+.themebtn { flex: none; width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: var(--bg); color: var(--fg); }
+.themebtn:hover { background: var(--accent-soft); }
+.themebtn svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.themebtn .sun { display: none; }
+#lockBtn.on { background: var(--accent); color: var(--accent-fg); }
+@media (max-width: 1100px) { #lockBtn { order: 2; margin-left: auto; } #lockBtn + .themebtn { margin-left: 0; } }
+.dlg p { margin: 0; font-size: .92rem; color: var(--muted); }
+.dlg ol { margin: 0; padding-left: 1.2em; font-size: .9rem; color: var(--muted); display: flex; flex-direction: column; gap: 4px; }
+.dlg a { color: var(--accent-strong); }
+/* ha a fejléc több sorba törik, a kapcsoló akkor is a jobb felső sarokban marad */
+@media (max-width: 1100px) { .top .brand { order: 0; } .nav { order: 1; } .themebtn { order: 2; margin-left: auto; } .searchbox { order: 3; flex-basis: 100%; } }
+@media (max-width: 820px) { .themebtn { order: 1; } .nav { order: 2; } }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .themebtn .sun { display: block; } :root:not([data-theme="light"]) .themebtn .moon { display: none; } }
+:root[data-theme="dark"] .themebtn .sun { display: block; } :root[data-theme="dark"] .themebtn .moon { display: none; }
+.semester { margin: 4px 0 0; font-size: 1.1rem; font-weight: 800; color: var(--muted); }
+#felev2, #felev1 { scroll-margin-top: 90px; }
+.searchbox { flex: 1 1 260px; min-width: 0; display: flex; }
+.searchbox input { flex: 1; min-width: 0; padding: 9px 16px; border: 1px solid transparent; border-radius: 99px; background: var(--bg); }
+.searchbox input:focus { border-color: var(--accent); background: var(--panel); outline: none; }
+.nav { display: flex; gap: 8px; }
+.nav button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 14px; font-weight: 800; background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.nav svg { flex: none; width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.nav button:hover { background: hsl(var(--h) var(--tile-s) var(--tile-deep)); }
+.nav button[aria-current="true"] { background: hsl(var(--h) var(--tile-s) var(--tile-deep)); box-shadow: inset 0 0 0 2px hsl(var(--h) 48% 60%); }
+
+main { padding-block: 28px 56px;
+  padding-left: max(clamp(16px, 3.5vw, 48px), env(safe-area-inset-left, 0px)); padding-right: max(clamp(16px, 3.5vw, 48px), env(safe-area-inset-right, 0px)); }
+.stack { display: flex; flex-direction: column; gap: 28px; }
+.sect { display: flex; flex-direction: column; gap: 12px; }
+.lead { margin: 6px 0 0; color: var(--muted); }
+.panel { background: var(--panel); border-radius: 18px; box-shadow: var(--shadow); padding: 16px; min-width: 0; }
+.empty { padding: 14px 16px; border-radius: 14px; border: 1.5px dashed var(--line); color: var(--muted); font-size: .94rem; }
+
+.board { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.calhead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.calhead b { font-weight: 800; }
+.calhead button { width: 30px; height: 30px; border-radius: 50%; text-align: center; font-weight: 800; }
+.calhead button:hover { background: var(--accent-soft); }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; text-align: center; }
+.cal .wd { font-size: .74rem; font-weight: 700; color: var(--muted); padding-bottom: 4px; }
+.cal .day { display: flex; flex-direction: column; align-items: center; gap: 2px; aspect-ratio: 1; max-width: 100%; padding-top: 5px; border-radius: 10px; font-size: .9rem; font-variant-numeric: tabular-nums; text-align: center; }
+.cal .past { color: var(--muted); opacity: .6; }
+.cal .today { background: var(--accent); color: var(--accent-fg); font-weight: 800; opacity: 1; }
+.cal button.day { background: hsl(var(--h) var(--tile-s) var(--tile-l)); font-weight: 800; }
+.cal button.day:hover, .cal button.day[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--accent-strong); }
+.dots { display: flex; gap: 2px; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--h) 45% 58%); }
+.dues { display: flex; flex-direction: column; gap: 8px; }
+.duewrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; align-items: stretch; }
+.evedit { width: 34px; border-radius: 12px; text-align: center; color: var(--muted); font-size: 1rem; }
+.evedit:hover { background: var(--accent-soft); color: var(--fg); }
+.dueacts { display: flex; gap: 12px; align-items: baseline; }
+.addev { color: var(--accent-strong); font-size: .9rem; font-weight: 800; }
+.addev:hover { text-decoration: underline; }
+.dlgback { position: fixed; inset: 0; z-index: 20; background: rgba(15, 18, 30, .45); display: grid; place-items: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.dlg { --h: 225; width: min(460px, 100%); max-height: 100%; overflow: auto; background: var(--panel); border-radius: 18px; box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.fld { display: flex; flex-direction: column; gap: 4px; font-size: .9rem; font-weight: 700; color: var(--muted); min-width: 0; }
+.fld input, .fld select { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-weight: 600; min-width: 0; }
+.fld input:focus, .fld select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.fldrow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.delbtn { margin-left: auto; padding: 8px 14px; border-radius: 99px; font-weight: 700; color: var(--warn); }
+.delbtn:hover { background: var(--warn-soft); }
+.duepanel { display: flex; flex-direction: column; }
+.duepanel .dues { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 4px; }
+@media (min-width: 821px) { .board { align-items: stretch; } .duepanel { contain: size; } }
+@media (max-width: 820px) { .duepanel .dues { max-height: 380px; } }
+.duehead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 4px; }
+.duehead button { color: var(--accent-strong); font-size: .9rem; font-weight: 700; }
+.due { display: grid; grid-template-columns: 58px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; padding: 8px 12px 8px 8px; border-radius: 14px; background: hsl(var(--h) var(--tile-s) var(--tag-l)); }
+.due:hover { background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.date { display: flex; flex-direction: column; align-items: center; padding: 4px 0; border-radius: 10px; background: hsl(var(--h) var(--tile-s) var(--tile-deep)); line-height: 1.1; }
+.date b { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.date small { font-size: .7rem; font-weight: 700; }
+.due strong { display: block; font-weight: 800; line-height: 1.25; }
+.due span.sub { display: block; font-size: .85rem; color: var(--muted); line-height: 1.25; }
+.left { font-size: .82rem; font-weight: 800; white-space: nowrap; }
+.left.soon { padding: 2px 9px; border-radius: 99px; background: var(--warn-soft); color: var(--warn); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.tile { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 6px; min-height: 142px; width: 100%; padding: 16px 18px; border-radius: 18px;
+  background: hsl(var(--h) var(--tile-s) var(--tile-l)); transition: transform .15s, box-shadow .15s; }
+.tile::after { content: ""; position: absolute; right: -34px; top: -34px; width: 104px; height: 104px; border-radius: 50%; background: hsl(var(--h) var(--tile-s) var(--tile-deep)); }
+.tile:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+/* teljesített tárgy: kifakult, nem aktív */
+.tile.done { --tile-s: 0%; color: var(--muted); }
+.tile.done .mini i { background: var(--muted); opacity: .6; }
+.tile.done b { color: var(--muted); }
+.tile.done .next { color: var(--muted); }
+.tile.done:hover { box-shadow: var(--shadow), inset 0 0 0 1px var(--line); }
+.tile.done .meta, .tile.done .mini { margin-right: 58px; }
+.gradebig { position: absolute; z-index: 1; bottom: 12px; right: 16px; display: flex; flex-direction: column; align-items: center; line-height: 1; font-size: 2.2rem; font-weight: 800; color: var(--fg); font-variant-numeric: tabular-nums; }
+.gradebig small { font-size: .7rem; font-weight: 800; color: var(--muted); margin-bottom: 2px; }
+.tile b { position: relative; z-index: 1; display: block; max-width: 86%; font-weight: 800; font-size: 1.08rem; line-height: 1.22; text-wrap: balance; }
+.tile .meta { margin-top: auto; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.tile .next { position: relative; z-index: 1; align-self: flex-start; font-size: .8rem; font-weight: 800; padding: 2px 10px; border-radius: 99px; background: var(--panel); }
+.mini { height: 6px; border-radius: 99px; background: hsl(var(--h) var(--tile-s) var(--tile-deep)); overflow: hidden; }
+.mini i { display: block; height: 100%; border-radius: 99px; background: hsl(var(--h) 48% 58%); }
+
+.band { position: relative; overflow: hidden; border-radius: 22px; padding: 20px 24px; background: hsl(var(--h) var(--tile-s) var(--tile-l)); display: flex; flex-direction: column; gap: 6px; }
+.band::after { content: ""; position: absolute; right: -40px; bottom: -70px; width: 190px; height: 190px; border-radius: 50%; background: hsl(var(--h) var(--tile-s) var(--tile-deep)); }
+.band > * { position: relative; z-index: 1; }
+.back { align-self: flex-start; font-size: .9rem; font-weight: 700; }
+.back:hover { text-decoration: underline; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.side { display: flex; flex-direction: column; gap: 16px; }
+
+.score { display: flex; flex-direction: column; gap: 10px; }
+.score .big { font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.score .big small { font-size: 1rem; color: var(--muted); font-weight: 700; }
+.bar { position: relative; height: 14px; border-radius: 99px; background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.bar .fill { position: absolute; inset: 0 auto 0 0; border-radius: 99px; background: hsl(var(--h) 48% 60%); }
+.bar .need { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--fg); border-radius: 2px; }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; font-size: .94rem; margin: 0; }
+.kv dt { color: var(--muted); } .kv dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; }
+.parts { display: flex; flex-direction: column; gap: 6px; }
+.part { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .94rem; }
+.part:first-child { border-top: 0; }
+.part b { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.syl { display: flex; flex-direction: column; gap: 14px; }
+.syl h3 { font-size: 1rem; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 0; }
+.facts div { padding: 10px 12px; border-radius: 14px; background: hsl(var(--h) var(--tile-s) var(--tag-l)); min-width: 0; }
+.facts dt { font-size: .76rem; font-weight: 800; color: var(--muted); }
+.facts dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; line-height: 1.3; }
+.goal { margin: 0; }
+.syl .panel { display: flex; flex-direction: column; gap: 8px; }
+.part.sum { font-weight: 800; border-top: 2px solid var(--line); }
+.rules { margin: 4px 0 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; font-size: .94rem; }
+details.panel summary { cursor: pointer; list-style: none; display: flex; align-items: center; gap: 8px; }
+details.panel summary::-webkit-details-marker { display: none; }
+details.panel summary::before { content: "›"; font-weight: 800; transition: transform .15s; }
+details.panel[open] summary::before { transform: rotate(90deg); }
+.topics { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 4px; font-size: .94rem; }
+.scorehead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.editbtn { font-size: .86rem; font-weight: 800; padding: 6px 12px; border-radius: 99px; background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.editbtn:hover { background: hsl(var(--h) var(--tile-s) var(--tile-deep)); }
+.editform { display: flex; flex-direction: column; gap: 8px; }
+.numrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; font-size: .94rem; }
+.numfield { display: flex; align-items: center; gap: 6px; }
+.numfield input, .numrow select { width: 5.5em; padding: 7px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font: inherit; font-variant-numeric: tabular-nums; text-align: right; }
+.numrow select { width: auto; text-align: left; }
+.numfield input:focus, .numrow select:focus { outline: 2px solid hsl(var(--h) 48% 60%); outline-offset: 1px; }
+.numfield small { color: var(--muted); font-size: .84rem; min-width: 3.2em; }
+.formhint { margin: 2px 0 0; font-size: .82rem; color: var(--muted); }
+.formerr { margin: 0; font-size: .86rem; font-weight: 700; color: var(--warn); }
+.formbtns { display: flex; gap: 8px; margin-top: 4px; }
+.savebtn { padding: 8px 18px; border-radius: 99px; font-weight: 800; background: hsl(var(--h) 48% 60%); color: #fff; }
+.savebtn:hover { background: hsl(var(--h) 48% 52%); }
+.savebtn:disabled { opacity: .6; cursor: default; }
+.cancelbtn { padding: 8px 14px; border-radius: 99px; font-weight: 700; color: var(--muted); }
+.cancelbtn:hover { background: var(--accent-soft); color: var(--fg); }
+.dbnote { margin: 4px 0 0; font-size: .82rem; color: var(--muted); }
+.score h3 { margin-top: 6px; font-size: .95rem; color: var(--muted); }
+.bar .need { opacity: .45; }
+.ticks { position: relative; height: 1.1em; margin-top: -6px; font-size: .74rem; font-weight: 800; color: var(--muted); }
+.ticks span { position: absolute; top: 0; transform: translateX(-50%); }
+.part small { display: block; font-size: .8rem; font-weight: 600; color: var(--muted); }
+.part.ok > span { font-weight: 700; }
+.tile .meta { position: relative; z-index: 1; }
+.tile .meta strong { font-weight: 800; }
+.tile .meta small { display: block; font-size: .82rem; color: var(--muted); }
+
+.docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.doc { display: flex; flex-direction: column; gap: 6px; min-height: 104px; padding: 12px 14px; border-radius: 14px; background: var(--panel); box-shadow: var(--shadow); text-decoration: none; }
+.doc:hover { background: hsl(var(--h) var(--tile-s) var(--tag-l)); transform: translateY(-1px); }
+.doc .ttl { overflow-wrap: anywhere; line-height: 1.28; font-weight: 700; }
+.doc .meta { margin-top: auto; color: var(--muted); font-size: .84rem; }
+.tag { align-self: flex-start; font-size: .74rem; font-weight: 800; padding: 1px 9px; border-radius: 99px; background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+
+.study { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: center; justify-content: space-between; padding: 18px 20px; border-radius: 18px; background: var(--panel); box-shadow: var(--shadow), inset 0 0 0 2px hsl(var(--h) 50% 75%); }
+.study p { margin: 2px 0 0; color: var(--muted); font-size: .92rem; max-width: 55ch; }
+.studies { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; align-content: start; }
+.studies .study { flex-direction: column; align-items: flex-start; justify-content: space-between; min-height: 150px; }
+.study .when { display: inline-block; margin-left: 4px; padding: 0 8px; border-radius: 99px; font-size: .8rem; font-weight: 800; color: var(--fg); background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.study.off { box-shadow: none; background: var(--bg); border: 1.5px dashed var(--line); }
+.study.off h2 { color: var(--muted); }
+.study.off .when { background: var(--line); color: var(--muted); }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 99px; background: hsl(var(--h) 48% 60%); color: #fff; font-weight: 800; text-decoration: none; white-space: nowrap; }
+.btn:hover { background: hsl(var(--h) 48% 52%); }
+.btn[aria-disabled="true"] { background: var(--line); color: var(--muted); pointer-events: none; }
+
+.hit { background: var(--panel); border-radius: 16px; box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.hit:hover { box-shadow: var(--shadow), inset 0 0 0 2px hsl(var(--h) 50% 72%); }
+.hit .where { display: flex; gap: 8px; align-items: center; font-size: .86rem; color: var(--muted); }
+.hit .where i { display: block; width: 12px; height: 12px; border-radius: 50%; background: hsl(var(--h) var(--tile-s) var(--tile-deep)); flex: none; }
+.hits { display: flex; flex-direction: column; gap: 10px; max-width: 80ch; }
+
+@media (max-width: 820px) {
+  .nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .board, .cols { grid-template-columns: minmax(0, 1fr); }
+  h1 { font-size: 1.7rem; }
+}
+@media (prefers-reduced-motion: reduce) { .tile, .doc { transition: none; } .tile:hover, .doc:hover { transform: none; } }
+</style>
+
+<header class="top">
+  <button class="brand" id="brand" type="button">Marketing mesterképzés</button>
+  <nav class="nav" aria-label="Fő menü">
+    <button type="button" id="nav-naptar" style="--h:225"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Naptár</button>
+    <button type="button" id="nav-kereses" style="--h:150"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Keresés</button>
+    <button type="button" id="nav-felev2" style="--h:28"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"/></svg>2. félév</button>
+    <button type="button" id="nav-felev1" style="--h:55"><svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5-9-5z"/><path d="M7 11.5V16c0 1.5 2.2 3 5 3s5-1.5 5-3v-4.5"/></svg>1. félév</button>
+  </nav>
+  <label class="searchbox" for="q"><input id="q" type="search" placeholder="Keresés tárgyak, anyagok, dátumok között…" autocomplete="off" aria-label="Keresés"></label>
+  <button type="button" class="themebtn" id="lockBtn" aria-label="Szerkesztés bekapcsolása" title="Szerkesztés">
+    <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+  </button>
+  <button type="button" class="themebtn" id="themeBtn" aria-label="Sötét / világos mód váltása" title="Sötét / világos mód">
+    <svg class="moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+<main id="app"></main>
+<div class="dlgback" id="evDlg" hidden></div>
+
+<script>
+/* ===== Adatok — ide kerülnek a dátumok, pontok, anyagok és tanulóoldal-linkek ===== */
+/* parts: számonkérések { name, date, max, score, need } — score: null = még nincs megírva, need: minimum pont (ha van).
+   bonus: plusz pont { max, score }. need: a tárgy teljesítéséhez szükséges összpont. grade: érdemjegy, ha lezárult. */
+const COURSES = [
+  { id: "marketingmenedzsment", name: "Marketingmenedzsment", h: 225,
+    parts: [
+      { name: "I. ZH", date: "2026-10-10", max: 50, score: 49 },
+      { name: "II. ZH", date: "2026-12-05", max: 50, score: null },
+    ], bonus: { max: 5, score: 4 }, need: null, grade: null, status: "", study: { "I. ZH": { url: "https://claude.ai/artifact/Xs1P8SMksS4Vg6admWEMGA", desc: "Kotler–Keller 1–3. fejezet, 2 előadás, próba-ZH." } }, materials: [] },
+  { id: "kozgazdasag", name: "Modern közgazdasági elméletek", h: 150,
+    parts: [
+      { name: "I. ZH", date: "2026-10-03", max: 50, score: 47.5 },
+      { name: "II. ZH", date: "2026-11-14", max: 50, score: null },
+    ], bonus: { max: 10, score: 10 }, need: null, grade: null, status: "",
+    study: { "I. ZH": { url: "https://kittijakab19.github.io/modern-kozgazdasagi-elmeletek/", desc: "01–03. előadás: gyakorlás, táblázatok, jegyzet." } }, materials: [] },
+  { id: "kutatasmodszertan", name: "Haladó kutatásmódszertan", h: 28,
+    parts: [
+      { name: "Vizsga", date: "2026-10-31", max: 100, score: 77.06 },
+    ], bonus: null, need: null, grade: 3, status: "Teljesítve, közepes (3) érdemjeggyel.", study: { "Vizsga": { url: "https://claude.ai/artifact/7sDtTu92ZWaS2HdK7RERrU", desc: "Jegyzet, fogalomtár, próbavizsga." } }, materials: [] },
+  { id: "ertekteremtes", name: "Értékteremtő folyamatok menedzsmentje", h: 285,
+    parts: [
+      { name: "I. ZH", date: "2026-10-17", max: 40, score: 35.09 },
+      { name: "Teszt", date: "2026-11-14", max: 20, score: null },
+      { name: "II. ZH", date: "2026-12-12", max: 40, score: null },
+    ], bonus: { max: 10, score: 2.5 }, need: null, grade: null, status: "", study: { "I. ZH": { url: "https://claude.ai/artifact/SzDytH3iLtuTJFJwE8WLL3", desc: "Jegyzet, előadás, számolás, próba-ZH." } }, materials: [] },
+  { id: "angol", name: "Üzleti és társadalomtudományi idegen nyelv (angol)", h: 190,
+    parts: [
+      { name: "Vizsga", date: "2026-10-10", max: 100, score: null },
+    ], bonus: null, need: null, grade: null, status: "", study: { "Vizsga": { url: "https://kittijakab19.github.io/uzleti-angol-drill/", desc: "Szókincs- és szaknyelvi gyakorló." } }, materials: [] },
+  { id: "matstat", name: "Matematikai-statisztikai elemzési módszerek", h: 345,
+    parts: [
+      { name: "I. ZH", date: "2026-11-07", max: 30, score: 30 },
+      { name: "Beadandó", date: "2026-12-06", max: 40, score: null },
+      { name: "II. ZH", date: "2026-12-19", max: 30, score: null },
+    ], bonus: { max: 10, score: 10 }, need: null, grade: null, status: "", study: { "I. ZH": { url: "https://claude.ai/artifact/CH8x6eVeiRAxBJtiFcDnnJ", desc: "Előadások, gyakorlás, próba-ZH." } }, materials: [] },
+  /* 1. félév — lezárult tárgyak */
+  { id: "markaepites", sem: 1, name: "Márkaépítés", h: 55,
+    parts: [
+      { name: "I. ZH", date: "2026-02-28", max: 50, score: 41 },
+      { name: "II. ZH", date: "2026-03-28", max: 50, score: 45 },
+    ], bonus: { max: 5, score: 4 }, need: null, grade: 5, status: "Teljesítve, jeles (5) érdemjeggyel.", materials: [] },
+  { id: "rendezveny", sem: 1, name: "Rendezvényszervezés", h: 5,
+    parts: [
+      { name: "I. ZH", date: "2026-03-21", max: 35, score: 34 },
+      { name: "II. ZH", date: "2026-04-25", max: 35, score: 30.6 },
+      { name: "Beadandó", date: "2026-05-08", max: 30, score: 29 },
+    ], bonus: null, need: null, grade: 5, status: "Teljesítve, jeles (5) érdemjeggyel.", materials: [] },
+  { id: "mkutatas", sem: 1, name: "Marketingkutatás modern módszerei", h: 265,
+    parts: [
+      { name: "I. ZH", date: "2026-03-28", max: 50, score: 38.2 },
+      { name: "II. ZH", date: "2026-05-09", max: 50, score: 33.67 },
+    ], bonus: { max: 10, score: 10 }, need: null, grade: 4, status: "Teljesítve, jó (4) érdemjeggyel.", materials: [] },
+  { id: "uzletiintelligencia", sem: 1, name: "Üzleti intelligencia és adatelemzés", h: 120,
+    parts: [
+      { name: "I. ZH", date: "2026-05-09", max: 30, score: 30 },
+      { name: "Beadandó", date: "2026-05-11", max: 40, score: 32 },
+      { name: "II. ZH", date: "2026-05-30", max: 30, score: 25.33 },
+    ], bonus: { max: 10, score: 10 }, need: null, grade: 5, status: "Teljesítve, jeles (5) érdemjeggyel.", materials: [] },
+  { id: "strategia", sem: 1, name: "Stratégiai menedzsment", h: 205,
+    parts: [
+      { name: "I. ZH", date: "2026-04-25", max: 50, score: 35 },
+      { name: "II. ZH", date: "2026-05-30", max: 50, score: 46 },
+    ], bonus: { max: 10, score: 10 }, need: null, grade: 5, status: "Teljesítve, jeles (5) érdemjeggyel.", materials: [] },
+];
+/* Egy esemény: { date: "2026-11-20", time: "12:05–12:35", course: "marketingmenedzsment", title: "ZH", note: "" } */
+const BASE_EVENTS = [
+  { date: "2026-10-03", time: "13:35–14:05", course: "kozgazdasag", title: "I. ZH" },
+  { date: "2026-10-10", time: "12:05–12:35", course: "marketingmenedzsment", title: "I. ZH" },
+  { date: "2026-10-10", time: "12:50–13:20", course: "angol", title: "Vizsga (ZH)" },
+  { date: "2026-10-17", time: "11:00–11:30", course: "ertekteremtes", title: "I. ZH" },
+  { date: "2026-10-31", time: "12:00–12:50", course: "kutatasmodszertan", title: "Vizsga" },
+  { date: "2026-11-07", time: "9:30–10:00", course: "matstat", title: "I. ZH" },
+  { date: "2026-11-14", time: "12:50–13:20", course: "kozgazdasag", title: "II. ZH" },
+  { date: "2026-11-14", course: "ertekteremtes", title: "Teszt" },
+  { date: "2026-12-05", time: "12:05–12:35", course: "marketingmenedzsment", title: "II. ZH" },
+  { date: "2026-12-06", time: "23:59", course: "matstat", title: "Beadandó leadása" },
+  { date: "2026-12-12", time: "9:30–10:00", course: "ertekteremtes", title: "II. ZH" },
+  { date: "2026-12-19", time: "8:00–8:30", course: "matstat", title: "II. ZH" },
+  /* 1. félév */
+  { date: "2026-02-28", time: "9:30–10:00", course: "markaepites", title: "I. ZH" },
+  { date: "2026-03-21", time: "12:05–12:35", course: "rendezveny", title: "I. ZH" },
+  { date: "2026-03-28", time: "8:00–8:30", course: "mkutatas", title: "I. ZH" },
+  { date: "2026-03-28", time: "8:45–9:15", course: "markaepites", title: "II. ZH" },
+  { date: "2026-04-25", time: "8:45–9:15", course: "rendezveny", title: "II. ZH" },
+  { date: "2026-04-25", time: "12:05–12:35", course: "strategia", title: "I. ZH" },
+  { date: "2026-05-08", course: "rendezveny", title: "Beadandó határidő" },
+  { date: "2026-05-09", time: "8:45–9:15", course: "mkutatas", title: "II. ZH" },
+  { date: "2026-05-09", time: "9:25–9:55", course: "uzletiintelligencia", title: "I. ZH" },
+  { date: "2026-05-11", course: "uzletiintelligencia", title: "Beadandó határidő" },
+  { date: "2026-05-30", time: "11:05–11:35", course: "uzletiintelligencia", title: "II. ZH" },
+  { date: "2026-05-30", time: "12:05–12:35", course: "strategia", title: "II. ZH" },
+];
+
+/* ===== Tantárgyleírások (a 2026/27/1. félév levelezős tantárgyleírásaiból) ===== */
+const SYLLABUS = {
+  marketingmenedzsment: {
+    code: "MANT00MA06", credit: 6, owner: "Dr. Papp-Váry Árpád Ferenc", dept: "Marketing Tanszék", eval: "Kollokvium",
+    goal: "A korábbi marketingismeretek rendszerezése egy modern, holisztikus marketingmodell alapján, és a legújabb marketingfogalmak, trendek megismerése.",
+    tasks: [["I. ZH", 50, "Vizsgaközponti (VK)"], ["II. ZH", 50, "Vizsgaközponti (VK)"]],
+    bonusMax: 5, zhMin: 50, zhMax: 100, totalMin: 60,
+    topics: ["A marketingmenedzsment alapjai", "Fogyasztói és üzleti piacok elemzése", "Marketingkutatás és insightok", "Piaci szegmentáció", "Pozicionálás", "Termék- és szolgáltatásstratégia", "Árképzés és értékesítésösztönzés", "Marketingkommunikáció", "Értékesítési csatornák és kiskereskedelem", "Növekedés versenypiacokon és innováció", "CSR és fenntarthatóság a marketingben", "Összefoglalás: nemzetközi piacra lépés, globális márkaépítés"],
+    lit: ["Kotler – Keller (2016): Marketingmenedzsment, 14. kiadás (MeRSZ)", "Papp-Váry Á. (2026): előadásdiák PDF-ben, CooSpace"],
+  },
+  kozgazdasag: {
+    code: "", credit: 6, owner: "Dr. Dobó Róbert", dept: "Fogyasztói Magatartás Tanszék", eval: "Kollokvium",
+    goal: "A mainstream és az alternatív közgazdaságtan alapjai, a világgazdaság fő korszakai, és az, hogyan jelennek meg a gazdaságelméletek a valós gazdasági jelenségekben.",
+    tasks: [["I. ZH", 50, "Vizsgaközponti (VK)"], ["II. ZH", 50, "Vizsgaközponti (VK)"]],
+    bonusMax: 10, zhMin: 50, zhMax: 100, totalMin: 60,
+    topics: ["A világgazdaság kialakulása, korai elméletek, gyarmatosítás, külkereskedelem, FDI", "Klasszikus, neoklasszikus, liberális, neoliberális és nem főáramú modellek (marxizmus, szocializmus)", "Alternatív közgazdaságtanok: vallási, ökológiai, degrowth, szolidáris gazdaság", "Fenntarthatóság és alternatív mutatók (boldogság-, szabadságindexek)", "Kultúrák és gazdasági gondolkodás: Kína, Japán (keiretsu), Korea (chaebol), Buen Vivir", "Versenyképesség, brain drain, privatizáció, válságelméletek", "Protekcionizmus, vámok, vámháborúk, az EU helyzete", "Gazdaságpolitika, jegybank, infláció, NAIRU", "Fogyasztói döntéselméletek: heurisztikák, prospect theory", "Kereslet-előrejelzés, költségek, árazás", "Információs aszimmetria, alkudozás, játékelmélet", "Piaci kudarcok, a közlegelők tragédiája, a láthatatlan kéz"],
+    lit: ["Acemoglu – Laibson – List (2022): Economics, 3rd Global Edition", "Skousen (2001): The Making of Modern Economics", "Acemoglu – Robinson (2012): Why Nations Fail"],
+  },
+  kutatasmodszertan: {
+    code: "", credit: 5, owner: "Dr. habil. Kása Richárd", dept: "Folyamatmenedzsment Tanszék", eval: "Kollokvium, egyéni felkészülésű tárgy (vizsgával teljesíthető)",
+    goal: "A tudományos kutatás logikája és folyamata: kutatási kérdés megfogalmazása, kvantitatív, kvalitatív és kevert módszerek tervezése, etikus kutatás és eredményközlés.",
+    tasks: [["Vizsga", 100, "Vizsgaidőszakban"]],
+    bonusMax: null, zhMin: null, zhMax: null, totalMin: 60,
+    topics: ["A tudományos kutatás fogalma, induktív és deduktív logika", "Feltáró, leíró és magyarázó kutatások, a kutatási kérdés operacionalizálása", "Elméleti megalapozás, a tudományosság kritériumai, kritikai szemlélet", "Hivatkozás, hivatkozáskezelők, plágiumellenőrzés", "Kvantitatív szemlélet: hipotézisvizsgálat, mintavétel, kérdőív, kísérlet", "Kvantitatív adatelemzés, szekunder adatbázisok, big data", "Kvalitatív módszerek: interjú, fókuszcsoport, megfigyelés, metaforamódszer", "Tartalom- és diskurzuselemzés, esettanulmány, kevert módszertan", "Minőségbiztosítás, kutatásetika, tudományos cikk és konferencia-előadás"],
+    lit: ["E-learning tananyag, CooSpace", "Ajánlott: Kovács Kármen: Kutatási és publikálási kézikönyv (MeRSZ)"],
+  },
+  ertekteremtes: {
+    code: "ERJE00MA06", credit: 6, owner: "Dr. Kalló Noémi", dept: "Folyamatmenedzsment Tanszék", eval: "Kollokvium",
+    goal: "Az értékteremtési folyamatok vállalati és ellátásilánc-szintű formái, a termék- és szolgáltatás-előállítás és az anyagáramlás szerepe, folyamatszemlélet és folyamatfejlesztés.",
+    tasks: [["I. ZH", 40, "Vizsgaközponti (VK)"], ["Teszt (órai teszt vagy beadandó)", 20, "11. tanítási hét, nincs pótlás"], ["II. ZH", 40, "Vizsgaközponti (VK)"]],
+    bonusMax: 10, zhMin: 40, zhMax: 80, totalMin: 60,
+    topics: ["Érték, értékteremtés, értéklánc és ellátási lánc", "Az értéklánc elsődleges és támogató tevékenységei", "Folyamatok, folyamatszemlélet", "Folyamatfejlesztés", "Vevői érték és elégedettség, szolgáltatásminőség"],
+    lit: [],
+  },
+  angol: {
+    code: "", credit: 3, owner: "Dr. Fajt Balázs", dept: "Idegennyelvi és Nyelvvizsga Központ", eval: "Kollokvium, angol nyelven",
+    goal: "Angol szaknyelvi kommunikáció az üzleti és társadalomtudományi területen: szakmai szövegek megértése, szókincsbővítés, üzleti nyelvhasználat.",
+    tasks: [["Vizsga (ZH)", 100, "Vizsgaközponti (VK)"]],
+    bonusMax: null, zhMin: null, zhMax: null, totalMin: 60,
+    topics: ["Alapvető pénzügyi és gazdasági fogalmak", "Bankrendszer, tőzsde", "Vállalkozási formák", "A politika szaknyelve", "Marketing"],
+    lit: ["Jegyzet és a hozzá tartozó glosszárium"],
+  },
+  matstat: {
+    code: "MAEK00MA06", credit: 6, owner: "Sándorné dr. habil Kriszt Éva", dept: "Kereskedelem és Logisztika Tanszék", eval: "Kollokvium",
+    goal: "Gazdasági függvények elemzése és optimumok keresése, lineáris programozás Excel Solverrel, valamint adattisztítás, feltáró elemzés és hipotézisvizsgálat.",
+    tasks: [["I. ZH", 30, "Vizsgaközponti (VK)"], ["Beadandó feladatok", 40, "Határidő: 12. tanítási hét, pótlás: 13. hét, javítható"], ["II. ZH", 30, ""]],
+    bonusMax: 10, zhMin: 30, zhMax: 60, totalMin: 60,
+    topics: ["Függvénytípusok és tulajdonságaik", "Függvények ábrázolása GeoGebrával", "Bevétel-, költség-, nyereség- és termékéletút-függvények", "Optimumok meghatározása", "Az optimalizálás és a lineáris programozás alapjai", "LP-modellek építése és elemzése", "LP-modellek megoldása Excel Solverrel", "LP-feladattípusok és gyakorlati feladatok", "Adattípusok, mérési szintek, adatmodellezés", "Adattisztítás: duplikátumok, hiányzó értékek, reprodukálhatóság", "Feltáró adatelemzés, eloszlások, kiugró értékek", "Hipotézisvizsgálat: paraméteres és nemparaméteres próbák"],
+    lit: ["Thomas-féle kalkulus 1. (Typotex, 2008)", "Kovács – Kovács: Modellek és megoldások – Bevezetés az operációkutatásba (2007)", "Békés – Kézdi: Adatelemzés (Alinea, 2024)"],
+  },
+  markaepites: {
+    code: "MAES00MA06", credit: 6, owner: "Dr. Papp-Váry Árpád Ferenc", dept: "Marketing Tanszék", eval: "Kollokvium, megajánlott jeggyel",
+    goal: "Átfogó kép a márkaépítésről: a márka előnyei a fogyasztónak és a vállalatnak, a márkaérték mérése, a márkanév, szlogen, logó és arculat, a márkakiterjesztés és a nemzetközi márkaépítés.",
+    tasks: [["I. ZH", 50, "Vizsgaközponti (VK)"], ["II. ZH", 50, "Vizsgaközponti (VK)"]],
+    bonusMax: 5, zhMin: 50, zhMax: 100, totalMin: 60, retake: "ZH pótolható. Elégtelen jegy a vizsgaidőszakban javítható (két alkalom).",
+    topics: ["Márkák mindenütt: a márka előnye a fogyasztónak és a vállalatnak", "A márka és a márkázás jelentése", "Branding modellek: brand key, brand guide", "A márkázás kulcsgondolatai I.: hozzáadott érték, differenciálás, pozicionálás", "A márkázás kulcsgondolatai II.: dizájn, arculat, érintkezési pontok, történetmesélés", "A márkázás kulcsgondolatai III.: személyiség, márka-archetípusok", "Márkaérték és mérése (Interbrand, BrandZ, BAV, Superbrands)", "Márkabővítés és márkakiterjesztés", "A márkanév ereje", "Szlogen, logó, márkaarculat", "Hitek és tévhitek a márkaépítésben", "Összefoglalás és vizsgafelkészítés"],
+    lit: ["Papp-Váry Árpád: A márkanév ereje (Ludovika, 2020), CooSpace", "Keller – Kotler: Marketingmenedzsment, 4. rész: Erős márkák építése (MeRSZ)"],
+  },
+  rendezveny: {
+    code: "REES0BA06", credit: 6, owner: "Szeidl Klaudia", dept: "Turizmus és Vendéglátás Tanszék", eval: "Gyakorlati jegy",
+    goal: "A rendezvények fogalma, eszközrendszere és feltételei, a rendezvényszervezés feladatai és sajátosságai, valamint a szektor aktuális trendjei.",
+    tasks: [["I. ZH", 35, "Vizsgaközponti (VK)"], ["II. ZH", 35, "Vizsgaközponti (VK)"], ["Egyéni beadandó", 30, "Határidő: 13. tanítási hét, pótlás: 14. hét, javítható"]],
+    bonusMax: null, zhMin: 35, zhMax: 70, totalMin: 60, retake: "Kritériumkövetelmény: a CooSpace-en elérhető elméleti tananyag teljesítése. ZH pótolható, elégtelen jegy a vizsgaidőszakban javítható (két alkalom).",
+    topics: ["Bevezetés a rendezvények világába", "Stratégiai tervezés I.: koncepció és célok", "Stratégiai tervezés II.: erőforrások és logisztika", "Stratégiai tervezés III.: megvalósítás, irányítás, értékelés", "Gasztronómia a rendezvényeken", "Rendezvénytechnika: hang, fény, vizuál", "Kulturális rendezvények I.: típusok, programtervezés", "Kulturális rendezvények II.: látogatói élmény", "Vállalati események és protokoll", "Sportrendezvények", "Fenntartható, zöld rendezvények", "Esküvőszervezés"],
+    lit: ["Köves T. (2016): Rendezvényszervezés ABC-je I.", "Varga P. (2017): Rendezvénybiblia", "Boros K. (szerk.) (2023): Az üzleti és a kulturális rendezvények értékteremtő ereje (MeRSZ)"],
+  },
+  mkutatas: {
+    code: "MAEI00MA06", credit: 6, owner: "Dr. Pólya Éva", dept: "Fogyasztói Magatartás Tanszék", eval: "Kollokvium, megajánlott jeggyel",
+    goal: "A marketingkutatás fejlődése a hagyományos módszerektől a digitális, viselkedésalapú és MI-alapú módszerekig, kvalitatív és kvantitatív megközelítésekkel és kutatásetikával.",
+    tasks: [["I. ZH", 50, "Vizsgaközponti (VK)"], ["II. ZH", 50, "Vizsgaközponti (VK)"]],
+    bonusMax: 10, zhMin: 50, zhMax: 100, totalMin: 60, retake: "Plusz pont: előadásonként 1 pont órai aktivitásért és 1 pont a CooSpace-teszt 60% feletti kitöltéséért (összesen 20 szerezhető, ebből 10 számít). ZH pótolható.",
+    topics: ["A marketingkutatás alapjai és kihívásai, trendek", "Szekunder adatelemzés, online kvantitatív és kvalitatív megkérdezés, projektív módszerek", "Digitális történetmesélés, online etnográfia, social listening, szentimentelemzés", "Neuromarketing, biometria, AI, VR, szintetikus adatok", "Kvalitatív adatelemzés, adatvizualizáció, kutatásetika"],
+    lit: ["Szűcs – Lázár – Németh (2023): Marketingkutatás 4.0 (MeRSZ)", "Malhotra (2019): Marketing Research: An Applied Orientation, 7th Ed."],
+  },
+  uzletiintelligencia: {
+    code: "", credit: 6, owner: "Dr. Sándor Zoltán", dept: "Kereskedelem és Logisztika Tanszék", eval: "Kollokvium, megajánlott jeggyel",
+    goal: "Adatok kinyerése SQL-lel, adattisztítás, KPI-k, pivot táblák és dashboardok Excelben, valamint üzleti hipotézisek statisztikai vizsgálata marketingdöntésekhez.",
+    tasks: [["I. ZH", 30, "Vizsgaközponti (VK)"], ["II. ZH", 30, "Vizsgaközponti (VK)"], ["Beadandó feladatok", 40, "Határidő: 14. tanítási hét, pótlás: 15. hét, javítható"]],
+    bonusMax: 10, zhMin: 30, zhMax: 60, totalMin: 60, retake: "ZH pótolható. Elégtelen jegy a vizsgaidőszakban javítható (két alkalom).",
+    topics: ["Az üzleti intelligencia adatbázis-szemlélete", "Relációs adatbázisok alapfogalmai", "SQL-lekérdezések, aggregálás, csoportosítás", "Adattisztítás Excelben", "Excel-függvények üzleti elemzéshez", "KPI-ok Excelben", "Pivot táblák és kimutatások", "Dashboard-tervezés", "Üzleti hipotézisek", "Leíró statisztika", "Statisztikai próbák alapjai", "Gyakori próbák gyakorlati példákon"],
+    lit: ["Békés – Kézdi: Adatelemzés (Alinea, 2024)"],
+  },
+  strategia: {
+    code: "", credit: 6, owner: "Dr. Kovács Judit Erzsébet", dept: "Vezetés és Szervezés Tanszék", eval: "Kollokvium, megajánlott jeggyel",
+    goal: "A stratégia és a stratégiai menedzsment fogalmai és gyakorlata: környezetelemzés, versenystratégiák, változásvezetés, stratégiai gondolkodás és döntéshozatal.",
+    tasks: [["I. ZH", 50, "Vizsgaközponti (VK)"], ["II. ZH", 50, "Vizsgaközponti (VK)"]],
+    bonusMax: 10, zhMin: 50, zhMax: 100, totalMin: 60, retake: "ZH pótolható. Elégtelen jegy a vizsgaidőszakban javítható (két alkalom).",
+    topics: ["Mi a stratégia? Szintek és kulcsfogalmak", "Makrokörnyezet: PESTEL, forgatókönyvek", "Iparági környezet: Porter öt erő modellje", "Belső környezet: erőforrás-alapú stratégia, VRIN", "Érintettek (stakeholderek) feltérképezése", "Vállalkozói szellem és innováció", "Szervezeti növekedés és megújulás", "Fúziók, felvásárlások, szövetségek", "Struktúra és stratégia illeszkedése, megvalósítás", "Versenystratégiák, üzleti modellek", "Nemzetközi stratégiák és szervezeti kultúra", "Stratégia, vezetés és hatalom"],
+    lit: ["Balaton – Tari (szerk.) (2014): Stratégiai és üzleti tervezés (MeRSZ)", "Balaton és mtsai (2017): Stratégiai menedzsment (MeRSZ)", "Dobák – Antal (2013): Vezetés és szervezés (MeRSZ)"],
+  },
+};
+const SCALE = [["0–59", "elégtelen (1)"], ["60–69", "elégséges (2)"], ["70–79", "közepes (3)"], ["80–89", "jó (4)"], ["90–100", "jeles (5)"]];
+
+function syllabusHtml(c) {
+  const y = SYLLABUS[c.id];
+  if (!y) return `<div class="empty">Ide kerülnek a tárgy követelményei.</div>`;
+  const facts = [y.code && ["Neptun-kód", y.code], ["Kredit", y.credit], ["Felelős", y.owner], ["Tanszék", y.dept], ["Értékelés", y.eval]].filter(Boolean);
+  const total = sum(y.tasks, t => t[1]);
+  return `<div class="syl">
+    <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>
+    <p class="goal">${esc(y.goal)}</p>
+    <div class="panel"><h3>Számonkérések</h3>
+      <div class="parts">${y.tasks.map(([n, pts, form]) => `<div class="part"><span>${esc(n)}${form ? `<small>${esc(form)}</small>` : ""}</span><b>${pts} pont</b></div>`).join("")}
+        <div class="part sum"><span>Összesen</span><b>${total} pont</b></div></div>
+      <ul class="rules">
+        ${y.bonusMax ? `<li>Többletpont: legfeljebb <b>${y.bonusMax} pont</b> számít bele.</li>` : `<li>Többletpont nem szerezhető.</li>`}
+        ${y.zhMin ? `<li>A ZH-k összpontszáma legalább <b>${y.zhMin} pont</b> legyen (${y.zhMax} pontból).</li>` : ""}
+        <li>Az elégségeshez a félév összpontszáma legalább <b>${y.totalMin} pont</b>.</li>
+        <li>${esc(y.retake || "ZH pótlása vizsgajelleggel lehetséges. Vizsgaidőszakban a félévközi pontok és többletpontok nem számítanak.")}</li>
+      </ul>
+    </div>
+    <div class="panel"><h3>Ponttáblázat</h3><div class="parts">${SCALE.map(([r, g]) => `<div class="part"><span>${g}</span><b>${r} pont</b></div>`).join("")}</div></div>
+    <details class="panel"><summary><h3>Ismeretkörök (${y.topics.length})</h3></summary><ol class="topics">${y.topics.map(t => `<li>${esc(t)}</li>`).join("")}</ol></details>
+    ${y.lit.length ? `<details class="panel"><summary><h3>Irodalom</h3></summary><ul class="topics">${y.lit.map(t => `<li>${esc(t)}</li>`).join("")}</ul></details>` : ""}
+  </div>`;
+}
+
+/* ===== Megjelenítés ===== */
+const app = document.getElementById("app");
+const q = document.getElementById("q");
+const MONTHS = ["január","február","március","április","május","június","július","augusztus","szeptember","október","november","december"];
+const MON_SHORT = ["jan","febr","márc","ápr","máj","jún","júl","aug","szept","okt","nov","dec"];
+const WD = ["H","K","Sze","Cs","P","Szo","V"];
+const byId = Object.fromEntries(COURSES.map(c => [c.id, c]));
+/* A beírt eredmények a megosztott adatbázisban vannak (results/<tárgy>), a fenti adatok csak az alapértékek */
+const BASE = Object.fromEntries(COURSES.map(c => [c.id, JSON.parse(JSON.stringify({ parts: c.parts, bonus: c.bonus, grade: c.grade, status: c.status }))]));
+const GRADE_NAME = { 1: "elégtelen", 2: "elégséges", 3: "közepes", 4: "jó", 5: "jeles" };
+const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const today = new Date(); today.setHours(0,0,0,0);
+const TODAY = iso(today);
+const parse = s => { const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); };
+const daysLeft = s => Math.round((parse(s) - today) / 864e5);
+const leftLabel = n => n === 0 ? "ma" : n === 1 ? "holnap" : `${n} nap`;
+/* A naptár: az alap dátumok (b0, b1, …) plusz a beírt módosítások és új dátumok (events/<id>) */
+BASE_EVENTS.forEach((e, i) => { e.id = "b" + i; });
+let EVENTS = BASE_EVENTS.map(e => ({ ...e }));
+const sorted = () => [...EVENTS].sort((a,b) => a.date.localeCompare(b.date));
+const upcoming = id => sorted().filter(e => e.date >= TODAY && (!id || e.course === id));
+const hueOf = e => byId[e.course]?.h ?? 225;
+
+let state = { view: "naptar", course: null, month: new Date(today.getFullYear(), today.getMonth(), 1), day: null };
+
+function dueRow(e) {
+  const d = parse(e.date), n = daysLeft(e.date), c = byId[e.course];
+  const row = `<button class="due" type="button" style="--h:${hueOf(e)}" data-course="${esc(e.course)}">
+    <span class="date"><b>${d.getDate()}</b><small>${MON_SHORT[d.getMonth()]}</small></span>
+    <span><strong>${esc(e.title)}</strong><span class="sub">${e.time ? esc(e.time) + " · " : ""}${esc(c?.name ?? "")}${e.note ? " · " + esc(e.note) : ""}</span></span>
+    <span class="left${n >= 0 && n <= 7 ? " soon" : ""}">${n >= 0 ? leftLabel(n) : "lezajlott"}</span></button>`;
+  return canWrite ? `<div class="duewrap">${row}<button type="button" class="evedit" data-evedit="${esc(e.id)}" aria-label="${esc(e.title)} szerkesztése" title="Szerkesztés">✎</button></div>` : row;
+}
+
+function calendar() {
+  const m = state.month, y = m.getFullYear(), mo = m.getMonth();
+  const first = (new Date(y, mo, 1).getDay() + 6) % 7, len = new Date(y, mo + 1, 0).getDate();
+  let cells = WD.map(w => `<span class="wd">${w}</span>`).join("") + "<span></span>".repeat(first);
+  for (let d = 1; d <= len; d++) {
+    const key = iso(new Date(y, mo, d)), evs = EVENTS.filter(e => e.date === key);
+    const cls = ["day", key < TODAY ? "past" : "", key === TODAY ? "today" : ""].join(" ");
+    if (evs.length) {
+      cells += `<button type="button" class="${cls}" style="--h:${hueOf(evs[0])}" data-day="${key}" aria-pressed="${state.day === key}" aria-label="${d}. – ${evs.length} esemény">${d}<span class="dots">${evs.slice(0,3).map(e => `<i style="--h:${hueOf(e)}"></i>`).join("")}</span></button>`;
+    } else cells += `<span class="${cls}">${d}</span>`;
+  }
+  cells += `<span class="day" aria-hidden="true"></span>`.repeat(42 - first - len);
+  return `<div class="panel">
+    <div class="calhead"><button type="button" data-month="-1" aria-label="Előző hónap">‹</button><b>${y}. ${MONTHS[mo]}</b><button type="button" data-month="1" aria-label="Következő hónap">›</button></div>
+    <div class="cal">${cells}</div></div>`;
+}
+
+const fmt = n => n == null ? "–" : Number(n).toLocaleString("hu-HU", { maximumFractionDigits: 2 });
+const sum = (xs, f) => xs.reduce((s, x) => s + f(x), 0);
+function stats(c) {
+  const ps = c.parts; if (!ps.length) return null;
+  const done = ps.filter(p => p.score != null), left = ps.filter(p => p.score == null);
+  const max = ps.every(p => p.max != null) ? sum(ps, p => p.max) : null;
+  const leftMax = left.every(p => p.max != null) ? sum(left, p => p.max) : null;
+  const total = sum(done, p => p.score) + (c.bonus?.score ?? 0);
+  return { done: done.length, count: ps.length, left: left.length, max, leftMax, total, pc: max ? Math.min(100, Math.round(total / max * 100)) : null };
+}
+
+/* Jegyhatárok — minden tárgynál a maximális pontszám százalékában */
+const GRADES = [
+  { g: 2, name: "Elégséges", to: "elégségeshez", pc: 59.5 },
+  { g: 3, name: "Közepes", to: "közepeshez", pc: 69.5 },
+  { g: 4, name: "Jó", to: "jóhoz", pc: 79.5 },
+  { g: 5, name: "Jeles", to: "jeleshez", pc: 89.5 },
+];
+function gradeInfo(s) {
+  if (!s?.max) return null;
+  const rows = GRADES.map(g => { const pts = g.pc / 100 * s.max, miss = Math.max(0, pts - s.total);
+    return { ...g, pts, miss, ok: miss === 0, reachable: s.leftMax == null || miss <= s.leftMax }; });
+  const cur = [...rows].reverse().find(r => r.ok) || null, next = rows.find(r => !r.ok) || null;
+  return { rows, cur, next };
+}
+
+function viewNaptar() {
+  const list = state.day ? sorted().filter(e => e.date === state.day) : upcoming();
+  const dayTitle = state.day ? (() => { const d = parse(state.day); return `${MONTHS[d.getMonth()]} ${d.getDate()}.`; })() : "Közelgő dátumok";
+  const dues = list.length ? list.map(dueRow).join("")
+    : `<div class="empty">${EVENTS.length ? "Erre nincs esemény." : "Még nincsenek dátumok felvéve. Amint megadod a ZH-k, beadandók és vizsgák időpontjait, itt és a naptárban is megjelennek."}</div>`;
+  const tile = c => {
+    const nx = upcoming(c.id)[0], s = stats(c);
+    const chip = c.grade != null ? "Teljesítve" : nx ? `${esc(nx.title)} · ${leftLabel(daysLeft(nx.date))}` : "";
+    return `<button class="tile${c.grade != null ? " done" : ""}" type="button" style="--h:${c.h}" data-course="${c.id}">
+      <b>${esc(c.name)}</b>
+      ${c.grade != null ? `<span class="gradebig" aria-label="Jegy: ${c.grade}"><small>Jegy</small>${c.grade}</span>` : ""}
+      ${chip ? `<span class="next">${chip}</span>` : ""}
+      <span class="meta">${s ? `<strong>${fmt(s.total)}${s.max != null ? " / " + fmt(s.max) : ""} pont</strong>${c.bonus ? ` · ebből ${fmt(c.bonus.score)} plusz` : ""}<small>${s.done} / ${s.count} számonkérés megírva</small>${(() => { const gi = c.grade == null && gradeInfo(s); if (!gi) return "";
+        return `<small>${gi.cur ? `Most: ${gi.cur.name.toLowerCase()} (${gi.cur.g})` : ""}${gi.cur && gi.next ? " · " : ""}${gi.next ? `${gi.next.to} még ${fmt(gi.next.miss)} pont` : ""}</small>`; })()}` : "Pontok hamarosan"}</span>
+      ${s?.pc != null ? `<span class="mini"><i style="width:${s.pc}%"></i></span>` : ""}
+    </button>`;
+  };
+  const tiles = COURSES.filter(c => (c.sem ?? 2) === 2).map(tile).join(""), tiles1 = COURSES.filter(c => c.sem === 1).map(tile).join("");
+  return `<div class="stack">
+    <div><h1>Naptár</h1><p class="lead">A félév ZH-i, vizsgái és beadandói egy helyen. Kattints egy tárgyra az anyagokért, a pontjaidért és a tanulóoldalért.</p></div>
+    <section class="board" aria-label="Naptár és határidők">${calendar()}
+      <div class="panel duepanel"><div class="duehead"><h2>${dayTitle}</h2><span class="dueacts">${state.day ? `<button type="button" id="clearday">Összes közelgő</button>` : ""}${canWrite ? `<button type="button" class="addev" data-evnew="">+ Új dátum</button>` : ""}</span></div><div class="dues">${dues}</div></div>
+    </section>
+    <section class="sect" id="felev2"><div><h1>Tárgyak</h1><p class="semester">2. félév</p></div><div class="grid">${tiles}</div></section>
+    <section class="sect" id="felev1"><p class="semester">1. félév</p><div class="grid">${tiles1}</div></section>
+  </div>`;
+}
+
+function viewCourse(c) {
+  const s = stats(c);
+  const needPos = c.need != null && s?.max ? Math.min(100, c.need / s.max * 100) : null;
+  const score = s ? `
+      <div class="big">${fmt(s.total)}<small> / ${s.max != null ? fmt(s.max) : "?"} pont</small></div>
+      ${s.pc != null ? `<div class="bar" role="img" aria-label="${s.pc}% megszerezve"><span class="fill" style="width:${s.pc}%"></span>${GRADES.map(g => `<span class="need" style="left:${g.pc}%" title="${g.name} (${g.g}): ${fmt(g.pc)}%"></span>`).join("")}</div>
+      <div class="ticks" aria-hidden="true">${GRADES.map(g => `<span style="left:${g.pc}%">${g.g}</span>`).join("")}</div>` : ""}
+      <dl class="kv">
+        <dt>Megírva</dt><dd>${s.done} / ${s.count} számonkérés</dd>
+        ${(() => { const y = SYLLABUS[c.id]; if (!y?.zhMin) return ""; const z = sum(c.parts.filter(p => /ZH|Vizsga/.test(p.name) && p.score != null), p => p.score);
+          return `<dt>ZH-minimum</dt><dd>${fmt(z)} / ${y.zhMin}${z >= y.zhMin ? " ✓" : ` (még ${fmt(y.zhMin - z)})`}</dd>`; })()}
+        ${s.left ? `<dt>Még szerezhető</dt><dd>${s.leftMax != null ? fmt(s.leftMax) + " pont" : "–"}</dd>` : ""}
+        ${c.bonus ? `<dt>Plusz pont</dt><dd>${fmt(c.bonus.score)} / ${fmt(c.bonus.max)}${c.bonus.score >= c.bonus.max ? " ✓" : ""}</dd>` : ""}
+        ${c.need != null ? `<dt>Szükséges</dt><dd>${fmt(c.need)} pont</dd><dt>Hiányzik még</dt><dd>${fmt(Math.max(0, c.need - s.total))} pont</dd>` : ""}
+        ${c.grade != null ? `<dt>Érdemjegy</dt><dd>${c.grade}</dd>` : ""}
+      </dl>`
+    : `<div class="empty">Még nincs megadva, hogy hol tartasz. Ide kerül, hány pontod van, hány kell az átmenéshez, és mi van még hátra.</div>`;
+  const gradesHtml = (() => { const gi = gradeInfo(s); if (!gi) return "";
+        return `<div class="panel score"><h2>Jegyhatárok</h2><div class="parts">${gi.rows.map(r => `<div class="part${r.ok ? " ok" : ""}"><span>${r.ok ? "✓ " : ""}${r.name} (${r.g})<small>${fmt(r.pc)}% · ${fmt(r.pts)} pont</small></span>
+          <b>${r.ok ? "megvan" : r.reachable ? `még ${fmt(r.miss)}` : "már nem elérhető"}</b></div>`).join("")}</div></div>`; })();
+  const parts = c.parts.length ? `<div class="parts">${c.parts.map(x => {
+      const d = x.date ? parse(x.date) : null, ok = x.score != null;
+      return `<div class="part${ok ? " ok" : ""}"><span>${ok ? "✓ " : ""}${esc(x.name)}<small>${d ? `${MONTHS[d.getMonth()]} ${d.getDate()}.` : ""}${x.need != null ? ` · min. ${fmt(x.need)} pont` : ""}</small></span>
+        <b>${ok ? fmt(x.score) : "–"} / ${fmt(x.max)}${ok && x.max ? `<small>${Math.round(x.score / x.max * 100)}%</small>` : ""}</b></div>`;
+    }).join("")}${c.bonus ? `<div class="part${c.bonus.score ? " ok" : ""}"><span>${c.bonus.score ? "✓ " : ""}Plusz pont<small>beleszámít az összpontba</small></span>
+        <b>${fmt(c.bonus.score)} / ${fmt(c.bonus.max)}</b></div>` : ""}</div>` : "";
+  /* Tanulóoldal minden ZH-hoz, teszthez, vizsgához; amelyikhez még nincs link, szürke. */
+  const zh = c.parts.filter(p => /ZH/.test(p.name)).map(p => p.name);
+  const base = zh.length || !c.parts.length ? ["I. ZH", "II. ZH"] : c.parts.filter(p => !/beadandó/i.test(p.name)).map(p => p.name);
+  const names = [...new Set([...base, ...Object.keys(c.study || {})])];
+  const studies = names.map(n => {
+    const st = c.study?.[n], p = c.parts.find(x => x.name === n), d = p?.date ? parse(p.date) : null;
+    const when = d ? `${MONTHS[d.getMonth()]} ${d.getDate()}.` : "";
+    return `<section class="study${st?.url ? "" : " off"}">
+      <div><h2>${esc(n)} tanulóoldal</h2><p>${st?.url ? esc(st.desc || "") : "Még nem kész."}${when ? ` <span class="when">${when}</span>` : ""}</p></div>
+      <a class="btn" ${st?.url ? `href="${esc(st.url)}" target="_blank" rel="noopener"` : `aria-disabled="true"`}>${st?.url ? "Megnyitás ↗" : "Hamarosan"}</a>
+    </section>`;
+  }).join("");
+  const evs = upcoming(c.id);
+  return `<div class="stack" style="--h:${c.h}">
+    <section class="band"><button type="button" class="back" id="back">← Vissza a főoldalra</button><h1>${esc(c.name)}</h1>${c.status ? `<p class="lead" style="color:inherit">${esc(c.status)}</p>` : ""}</section>
+    ${c.grade != null && !Object.keys(c.study || {}).length ? "" : `<div class="studies">${studies}</div>`}
+    <div class="cols">
+      <section class="sect"><h2>Tantárgyleírás</h2>${syllabusHtml(c)}</section>
+      <aside class="side">
+        <div class="panel score">
+          <div class="scorehead"><h2>Hol tartok?</h2>${canWrite && editing !== c.id ? `<button type="button" class="editbtn" data-edit="${c.id}">Pontok szerkesztése</button>` : ""}</div>
+          ${editing === c.id ? editForm(c) : s ? score.replace("<dl", parts + "<dl") : score}
+          ${dbNote()}</div>
+        ${gradesHtml}
+        <div class="panel"><div class="duehead" style="margin-bottom:10px"><h2>Dátumok</h2>${canWrite ? `<button type="button" class="addev" data-evnew="${c.id}">+ Új dátum</button>` : ""}</div><div class="dues">${evs.length ? evs.map(dueRow).join("") : `<div class="empty">Nincs közelgő dátum.</div>`}</div></div>
+      </aside>
+    </div>
+  </div>`;
+}
+
+function viewKereses() {
+  const term = q.value.trim().toLowerCase();
+  const mark = s => { s = esc(s); if (!term) return s; const t = esc(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); return s.replace(new RegExp(t, "gi"), m => `<mark>${m}</mark>`); };
+  let hits = [];
+  if (term) {
+    for (const c of COURSES) {
+      if (c.name.toLowerCase().includes(term) || c.status.toLowerCase().includes(term)) hits.push({ c, kind: "Tárgy", title: c.name, sub: c.status });
+      for (const m of c.materials) if ([m.title, m.meta, m.tag].join(" ").toLowerCase().includes(term)) hits.push({ c, kind: "Előadásanyag", title: m.title, sub: m.meta });
+    }
+    for (const e of sorted()) { const c = byId[e.course]; if ([e.title, e.note, e.time, c?.name].join(" ").toLowerCase().includes(term)) hits.push({ c, kind: "Dátum · " + e.date.replaceAll("-", ". ") + ".", title: e.title, sub: e.note }); }
+  }
+  const body = !term ? `<div class="empty">Írj be egy kifejezést a fenti keresőbe: tárgynév, előadás címe, ZH, beadandó…</div>`
+    : hits.length ? `<p class="muted" style="margin:0">${hits.length} találat</p>` + hits.map(h => `
+      <button class="hit" type="button" style="--h:${h.c?.h ?? 225}" data-course="${esc(h.c?.id)}"><span class="where"><i></i>${esc(h.c?.name ?? "")} · ${esc(h.kind)}</span><h3>${mark(h.title)}</h3>${h.sub ? `<span class="muted">${mark(h.sub)}</span>` : ""}</button>`).join("")
+    : `<div class="empty">Nincs találat erre: „${esc(q.value.trim())}”.</div>`;
+  return `<div class="stack"><div><h1>Keresés</h1><p class="lead">Keresés a tárgyak, az előadásanyagok és a dátumok között.</p></div><div class="hits">${body}</div></div>`;
+}
+
+/* ===== Eredmények beírása ===== */
+let dbApi = null, canWrite = false, editing = null, dbState = "off", editError = "";
+function applyResults(docs) {
+  const saved = Object.fromEntries(docs.map(d => [d.id, d.data()]));
+  for (const c of COURSES) {
+    const b = BASE[c.id], d = saved[c.id];
+    c.parts = b.parts.map(p => ({ ...p }));
+    c.bonus = b.bonus ? { ...b.bonus } : null;
+    c.grade = b.grade; c.status = b.status;
+    if (!d) continue;
+    for (const p of c.parts) if (d.parts && p.name in d.parts) p.score = d.parts[p.name];
+    if ("bonus" in d) {
+      if (c.bonus) c.bonus.score = d.bonus ?? 0;
+      else if (d.bonus != null) c.bonus = { max: SYLLABUS[c.id]?.bonusMax ?? d.bonus, score: d.bonus };
+    }
+    if ("grade" in d) {
+      c.grade = d.grade;
+      c.status = d.grade >= 2 ? `Teljesítve, ${GRADE_NAME[d.grade]} (${d.grade}) érdemjeggyel.` : d.grade === 1 ? "Elégtelen (1) érdemjegy." : "";
+    }
+  }
+}
+function dbNote() {
+  if (dbState === "stale") return `<p class="dbnote">A mentett eredmények most nem érhetők el, az oldal a legutóbb ismert pontokat mutatja.</p>`;
+  if (dbState === "error") return `<p class="dbnote">A mentett eredmények nem tölthetők be. Frissítsd később az oldalt.</p>`;
+  return "";
+}
+const numIn = (id, v, max, label) => `<label class="numrow" for="${id}"><span>${label}</span>
+  <span class="numfield"><input id="${id}" type="text" inputmode="decimal" autocomplete="off" value="${v == null ? "" : String(v).replace(".", ",")}" placeholder="–">${max != null ? `<small>/ ${fmt(max)}</small>` : ""}</span></label>`;
+function editForm(c) {
+  const bonusMax = c.bonus?.max ?? SYLLABUS[c.id]?.bonusMax;
+  return `<form class="editform" id="editForm" data-course="${c.id}" novalidate>
+    ${c.parts.map((p, i) => numIn(`ed-p${i}`, p.score, p.max, esc(p.name))).join("")}
+    ${bonusMax ? numIn("ed-bonus", c.bonus?.score ?? null, bonusMax, "Plusz pont") : ""}
+    <label class="numrow" for="ed-grade"><span>Érdemjegy</span>
+      <select id="ed-grade"><option value="">még nincs</option>${[5, 4, 3, 2, 1].map(g => `<option value="${g}"${c.grade === g ? " selected" : ""}>${GRADE_NAME[g]} (${g})</option>`).join("")}</select></label>
+    <p class="formhint">Hagyd üresen, amit még nem írtál meg. Tizedesvesszővel is beírhatod, például 35,5.</p>
+    ${editError ? `<p class="formerr" role="alert">${esc(editError)}</p>` : ""}
+    <div class="formbtns"><button type="submit" class="savebtn">Mentés</button><button type="button" class="cancelbtn" id="editCancel">Mégse</button></div>
+  </form>`;
+}
+function readNum(id, max) {
+  const raw = document.getElementById(id)?.value.trim().replace(",", ".");
+  if (!raw) return { v: null };
+  const v = Number(raw);
+  if (!Number.isFinite(v) || v < 0 || (max != null && v > max)) return { err: true };
+  return { v: Math.round(v * 100) / 100 };
+}
+async function saveResults(c) {
+  const body = { parts: {} };
+  for (const [i, p] of c.parts.entries()) {
+    const r = readNum(`ed-p${i}`, p.max);
+    if (r.err) { editError = `${p.name}: 0 és ${fmt(p.max ?? 0)} közötti számot írj be.`; return render(); }
+    body.parts[p.name] = r.v;
+  }
+  if (document.getElementById("ed-bonus")) {
+    const max = c.bonus?.max ?? SYLLABUS[c.id]?.bonusMax, r = readNum("ed-bonus", max);
+    if (r.err) { editError = `Plusz pont: 0 és ${fmt(max)} közötti számot írj be.`; return render(); }
+    body.bonus = r.v;
+  }
+  const g = document.getElementById("ed-grade").value;
+  body.grade = g ? Number(g) : null;
+  const btn = document.querySelector("#editForm .savebtn"); if (btn) { btn.disabled = true; btn.textContent = "Mentés…"; }
+  try {
+    await dbApi.doc("results/" + c.id).set(body);
+    editing = null; editError = ""; render();
+  } catch (e) {
+    if (e?.code === "invalid_argument") { canWrite = false; editing = null; editError = ""; }
+    else editError = e?.code === "quota_exceeded" ? "Megtelt a tárhely, a mentés nem sikerült." : "A mentés nem sikerült, próbáld újra.";
+    render();
+  }
+}
+/* ===== Dátumok felvétele és módosítása ===== */
+let evDocs = [];
+const isBaseId = id => /^b\d+$/.test(id);
+function applyEvents() {
+  const saved = Object.fromEntries(evDocs.map(d => [d.id, d.data()]));
+  const ok = e => e && /^\d{4}-\d{2}-\d{2}$/.test(e.date || "") && byId[e.course] && e.title;
+  const list = [];
+  for (const b of BASE_EVENTS) {
+    const d = saved[b.id];
+    if (d?.deleted) continue;
+    const e = d ? { ...b, ...d, id: b.id } : { ...b };
+    if (ok(e)) list.push(e);
+  }
+  for (const [id, d] of Object.entries(saved)) if (!isBaseId(id) && !d.deleted && ok(d)) list.push({ ...d, id });
+  EVENTS = list;
+}
+let evEditing = null, evDelArmed = false;
+const evDlg = document.getElementById("evDlg");
+function openEvent(id, courseId) {
+  const e = id ? EVENTS.find(x => x.id === id) : { id: null, date: TODAY, time: "", course: courseId || state.course || COURSES[0].id, title: "", note: "" };
+  if (!e) return;
+  evEditing = e; evDelArmed = false;
+  drawEventDialog("");
+  evDlg.hidden = false;
+  document.getElementById("ev-title").focus();
+}
+function closeEvent() { evDlg.hidden = true; evDlg.innerHTML = ""; evEditing = null; }
+function drawEventDialog(err) {
+  const e = evEditing;
+  evDlg.innerHTML = `<form class="dlg" id="evForm" role="dialog" aria-modal="true" aria-labelledby="ev-h" novalidate>
+    <h2 id="ev-h">${e.id ? "Dátum módosítása" : "Új dátum"}</h2>
+    <label class="fld" for="ev-course"><span>Tárgy</span><select id="ev-course">${COURSES.map(c => `<option value="${c.id}"${c.id === e.course ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label>
+    <label class="fld" for="ev-title"><span>Megnevezés</span><input id="ev-title" type="text" list="ev-kinds" value="${esc(e.title)}" placeholder="pl. II. ZH, Beadandó, Vizsga" autocomplete="off"></label>
+    <datalist id="ev-kinds"><option value="I. ZH"><option value="II. ZH"><option value="Teszt"><option value="Beadandó leadása"><option value="Vizsga"><option value="Pótzh"></datalist>
+    <div class="fldrow">
+      <label class="fld" for="ev-date"><span>Dátum</span><input id="ev-date" type="date" value="${esc(e.date)}"></label>
+      <label class="fld" for="ev-time"><span>Időpont</span><input id="ev-time" type="text" value="${esc(e.time || "")}" placeholder="pl. 12:05–12:35" autocomplete="off"></label>
+    </div>
+    <label class="fld" for="ev-note"><span>Megjegyzés</span><input id="ev-note" type="text" value="${esc(e.note || "")}" placeholder="pl. terem, mit kell vinni" autocomplete="off"></label>
+    ${err ? `<p class="formerr" role="alert">${esc(err)}</p>` : ""}
+    <div class="formbtns">
+      <button type="submit" class="savebtn">Mentés</button>
+      <button type="button" class="cancelbtn" id="evCancel">Mégse</button>
+      ${e.id ? `<button type="button" class="delbtn" id="evDel">${evDelArmed ? "Biztosan törlöd? Kattints újra" : "Törlés"}</button>` : ""}
+    </div>
+  </form>`;
+}
+async function saveEvent() {
+  const v = id => document.getElementById(id).value.trim();
+  const body = { course: v("ev-course"), title: v("ev-title"), date: v("ev-date"), time: v("ev-time"), note: v("ev-note") };
+  if (!body.title) return drawEventDialog("Adj meg egy megnevezést, például II. ZH.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(body.date)) return drawEventDialog("Válassz dátumot.");
+  const btn = evDlg.querySelector(".savebtn"); btn.disabled = true; btn.textContent = "Mentés…";
+  try {
+    const ref = evEditing.id ? dbApi.doc("events/" + evEditing.id) : dbApi.doc("events/n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+    await ref.set(body);
+    const d = parse(body.date); state.month = new Date(d.getFullYear(), d.getMonth(), 1);
+    closeEvent(); render();
+  } catch (e) { drawEventDialog(e?.code === "quota_exceeded" ? "Megtelt a tárhely, a mentés nem sikerült." : "A mentés nem sikerült, próbáld újra."); }
+}
+async function deleteEvent() {
+  if (!evDelArmed) { evDelArmed = true; return drawEventDialog(""); }
+  const id = evEditing.id;
+  try {
+    if (isBaseId(id)) await dbApi.doc("events/" + id).set({ deleted: true });
+    else await dbApi.doc("events/" + id).delete();
+    closeEvent(); render();
+  } catch { evDelArmed = false; drawEventDialog("A törlés nem sikerült, próbáld újra."); }
+}
+evDlg.addEventListener("submit", ev => { if (ev.target.id !== "evForm") return; ev.preventDefault(); saveEvent(); });
+evDlg.addEventListener("click", ev => {
+  if (ev.target === evDlg || ev.target.id === "evCancel") return closeEvent();
+  if (ev.target.id === "evDel") deleteEvent();
+});
+document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !evDlg.hidden) closeEvent(); });
+
+/* ===== Tárolás a GitHubon: az eredmények és a dátumok a repó data.json fájljában vannak =====
+   Olvasni bárki tud; írni az tud, aki ezen a gépen megadta a saját GitHub-tokenjét (csak ebben a böngészőben marad). */
+const GH = { owner: "kittijakab19", repo: "marketing-mesterkepzes", path: "data.json", branch: "main" };
+const GH_API = `https://api.github.com/repos/${GH.owner}/${GH.repo}`;
+let STORE = { results: {}, events: {} }, ghSha = null, ghToken = null;
+try { ghToken = localStorage.getItem("mm-gh-token"); } catch {}
+const toDocs = col => Object.entries(STORE[col] || {}).map(([id, d]) => ({ id, data: () => d }));
+function refreshAll() { applyResults(toDocs("results")); evDocs = toDocs("events"); applyEvents(); if (!editing) render(); }
+const b64enc = str => { let b = ""; new TextEncoder().encode(str).forEach(x => { b += String.fromCharCode(x); }); return btoa(b); };
+const b64dec = b64 => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\s/g, "")), ch => ch.charCodeAt(0)));
+const ghHeaders = () => ({ Accept: "application/vnd.github+json", Authorization: "Bearer " + ghToken });
+async function ghLoad() {
+  if (ghToken) {
+    const r = await fetch(`${GH_API}/contents/${GH.path}?ref=${GH.branch}&t=${Date.now()}`, { headers: ghHeaders(), cache: "no-store" });
+    if (r.status === 404) { ghSha = null; return { results: {}, events: {} }; }
+    if (!r.ok) throw new Error("load " + r.status);
+    const j = await r.json(); ghSha = j.sha;
+    return JSON.parse(b64dec(j.content));
+  }
+  const r = await fetch(`${GH.path}?t=${Date.now()}`, { cache: "no-store" });
+  if (!r.ok) return { results: {}, events: {} };
+  return await r.json();
+}
+async function ghSave(note) {
+  const body = { message: note, content: b64enc(JSON.stringify(STORE, null, 2) + "\n"), branch: GH.branch };
+  if (ghSha) body.sha = ghSha;
+  const r = await fetch(`${GH_API}/contents/${GH.path}`, { method: "PUT", headers: { ...ghHeaders(), "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (r.status === 409 || r.status === 422) throw { code: "conflict" };
+  if (r.status === 401 || r.status === 403) throw { code: "invalid_argument" };
+  if (!r.ok) throw { code: "unavailable" };
+  ghSha = (await r.json()).content?.sha ?? ghSha;
+}
+/* ugyanaz a felület, amit a szerkesztők használnak: doc("results/<id>").set(...), doc("events/<id>").delete() */
+const ghDb = {
+  doc(path) {
+    const [col, id] = path.split("/");
+    const write = async (next, note) => {
+      const prev = STORE[col][id];
+      if (next === undefined) delete STORE[col][id]; else STORE[col][id] = next;
+      try { await ghSave(note); }
+      catch (e) {
+        if (prev === undefined) delete STORE[col][id]; else STORE[col][id] = prev;
+        if (e?.code === "conflict") { await reloadStore(); throw { code: "unavailable" }; }
+        throw e;
+      }
+      refreshAll();
+    };
+    return { set: body => write(body, `${col === "results" ? "Eredmények" : "Naptár"}: ${byId[body.course]?.name || byId[id]?.name || id}`), delete: () => write(undefined, `Naptár: dátum törölve (${id})`) };
+  },
+};
+async function reloadStore() {
+  const data = await ghLoad();
+  STORE = { results: data.results || {}, events: data.events || {} };
+  refreshAll();
+}
+async function checkToken(t) {
+  const r = await fetch(GH_API, { headers: { Accept: "application/vnd.github+json", Authorization: "Bearer " + t } });
+  if (!r.ok) return false;
+  const j = await r.json();
+  return !!j.permissions?.push;
+}
+const lockBtn = document.getElementById("lockBtn");
+function drawLock() { lockBtn.classList.toggle("on", canWrite); lockBtn.title = canWrite ? "Szerkesztés bekapcsolva" : "Szerkesztés bekapcsolása"; }
+function openLock(err) {
+  evDlg.innerHTML = canWrite ? `<form class="dlg" id="lockForm" role="dialog" aria-modal="true" aria-labelledby="lock-h">
+      <h2 id="lock-h">Szerkesztés bekapcsolva</h2>
+      <p>Ezen a gépen be tudod írni a pontokat és a dátumokat. A mentések a GitHub-repóba kerülnek, és minden eszközön megjelennek.</p>
+      <div class="formbtns"><button type="button" class="cancelbtn" id="evCancel">Bezárás</button><button type="button" class="delbtn" id="lockOff">Kijelentkezés ezen a gépen</button></div>
+    </form>` : `<form class="dlg" id="lockForm" role="dialog" aria-modal="true" aria-labelledby="lock-h" novalidate>
+      <h2 id="lock-h">Szerkesztés bekapcsolása</h2>
+      <p>A pontok és a dátumok mentéséhez add meg a saját GitHub-tokenedet. Csak ebben a böngészőben marad, máshova nem kerül.</p>
+      <ol><li>Nyisd meg: <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></li>
+        <li>Repository access: <b>Only select repositories</b> → <b>${GH.repo}</b></li>
+        <li>Permissions → Repository → <b>Contents: Read and write</b></li>
+        <li>Generate token, majd másold ide.</li></ol>
+      <label class="fld" for="lock-token"><span>GitHub-token</span><input id="lock-token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"></label>
+      ${err ? `<p class="formerr" role="alert">${esc(err)}</p>` : ""}
+      <div class="formbtns"><button type="submit" class="savebtn">Bekapcsolás</button><button type="button" class="cancelbtn" id="evCancel">Mégse</button></div>
+    </form>`;
+  evDlg.hidden = false;
+  document.getElementById("lock-token")?.focus();
+}
+evDlg.addEventListener("submit", async ev => {
+  if (ev.target.id !== "lockForm") return;
+  ev.preventDefault(); ev.stopImmediatePropagation();
+  const t = document.getElementById("lock-token").value.trim();
+  if (!t) return openLock("Másold be a tokent.");
+  const btn = evDlg.querySelector(".savebtn"); btn.disabled = true; btn.textContent = "Ellenőrzés…";
+  let ok = false; try { ok = await checkToken(t); } catch {}
+  if (!ok) return openLock("Ezzel a tokennel nem lehet írni a repóba. Ellenőrizd, hogy a marketing-mesterkepzes repóhoz adtál-e Contents: Read and write jogot.");
+  ghToken = t; try { localStorage.setItem("mm-gh-token", t); } catch {}
+  canWrite = true; drawLock(); closeEvent();
+  try { await reloadStore(); } catch {}
+  render();
+}, true);
+evDlg.addEventListener("click", ev => {
+  if (ev.target.id !== "lockOff") return;
+  ghToken = null; try { localStorage.removeItem("mm-gh-token"); } catch {}
+  canWrite = false; editing = null; drawLock(); closeEvent(); render();
+}, true);
+lockBtn.onclick = () => openLock("");
+async function initResults() {
+  dbApi = ghDb; dbState = "loading";
+  if (ghToken) { try { canWrite = await checkToken(ghToken); } catch { canWrite = false; } }
+  drawLock();
+  try { await reloadStore(); dbState = "ready"; }
+  catch { dbState = "error"; }
+  render();
+}
+
+function render() {
+  const c = state.view === "targy" ? byId[state.course] : null;
+  app.innerHTML = c ? viewCourse(c) : state.view === "kereses" ? viewKereses() : viewNaptar();
+  document.getElementById("nav-naptar").setAttribute("aria-current", state.view === "naptar");
+  document.getElementById("nav-kereses").setAttribute("aria-current", state.view === "kereses");
+}
+
+function go(view, course) {
+  editing = null; editError = "";
+  state.view = view; state.course = course ?? null;
+  const hash = view === "targy" ? course : view;
+  try { history.replaceState(null, "", "#" + hash); } catch {}
+  render(); window.scrollTo(0, 0);
+}
+
+app.addEventListener("submit", ev => {
+  if (ev.target.id !== "editForm") return;
+  ev.preventDefault();
+  saveResults(byId[ev.target.dataset.course]);
+});
+app.addEventListener("click", ev => {
+  const t = ev.target.closest("[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
+  if (!t) return;
+  if (t.dataset.evedit) return openEvent(t.dataset.evedit);
+  if (t.dataset.evnew !== undefined) return openEvent(null, t.dataset.evnew);
+  if (t.dataset.edit) { editing = t.dataset.edit; editError = ""; render(); return document.getElementById("ed-p0")?.focus(); }
+  if (t.id === "editCancel") { editing = null; editError = ""; return render(); }
+  if (t.closest("#editForm")) return;
+  if (t.id === "back") return go("naptar");
+  if (t.id === "clearday") { state.day = null; return render(); }
+  if (t.dataset.month) { state.month = new Date(state.month.getFullYear(), state.month.getMonth() + Number(t.dataset.month), 1); return render(); }
+  if (t.dataset.day) { state.day = state.day === t.dataset.day ? null : t.dataset.day; return render(); }
+  if (t.dataset.course && byId[t.dataset.course] && byId[t.dataset.course].tile !== false) go("targy", t.dataset.course);
+});
+document.getElementById("brand").onclick = () => go("naptar");
+document.getElementById("nav-naptar").onclick = () => go("naptar");
+const toSemester = id => { go("naptar"); try { history.replaceState(null, "", "#" + id); } catch {}
+  document.getElementById(id)?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); };
+document.getElementById("nav-felev2").onclick = () => toSemester("felev2");
+document.getElementById("nav-felev1").onclick = () => toSemester("felev1");
+document.getElementById("nav-kereses").onclick = () => { go("kereses"); q.focus(); };
+q.addEventListener("input", () => { if (state.view !== "kereses") { state.view = "kereses"; try { history.replaceState(null, "", "#kereses"); } catch {} } render(); });
+
+/* Sötét / világos mód: a választás megmarad ebben a böngészőben */
+const isDark = () => { const t = document.documentElement.dataset.theme; return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; };
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("mm-theme", t); } catch {}
+}
+try { const saved = localStorage.getItem("mm-theme"); if (saved === "dark" || saved === "light") document.documentElement.dataset.theme = saved; } catch {}
+document.getElementById("themeBtn").onclick = () => setTheme(isDark() ? "light" : "dark");
+
+const h = location.hash.slice(1);
+if (byId[h]) { state.view = "targy"; state.course = h; } else if (h === "kereses") state.view = "kereses";
+render();
+if (h === "felev2" || h === "felev1") document.getElementById(h)?.scrollIntoView();
+initResults();
+</script>

@@ -25,5 +25,13 @@
       "time": "10:15–10:45",
       "note": ""
     }
+  },
+  "courses": {},
+  "meta": {
+    "semesters": {
+      "list": [
+        3
+      ]
+    }
   }
 }

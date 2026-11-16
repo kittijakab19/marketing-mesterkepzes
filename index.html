@@ -63,6 +63,8 @@ mark { background: var(--mark); color: var(--mark-fg); border-radius: 3px; paddi
 .semester { margin: 4px 0 0; font-size: 1.1rem; font-weight: 800; color: var(--muted); }
 [id^="felev"] { scroll-margin-top: 90px; }
 .semhead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.delsem { color: var(--muted); font-size: .86rem; font-weight: 700; }
+.delsem:hover { color: var(--warn); text-decoration: underline; }
 .addsem { padding: 10px 18px; border-radius: 14px; font-weight: 800; color: var(--accent-strong); border: 1.5px dashed var(--line); }
 .addsem:hover { background: var(--accent-soft); }
 .bandedit { align-self: flex-start; font-size: .9rem; font-weight: 700; padding: 6px 12px; border-radius: 99px; background: var(--panel); }
@@ -591,7 +593,8 @@ function viewNaptar() {
   const sems = semesters();
   const semSection = (n, i) => {
     const list = COURSES.filter(c => (c.sem ?? 2) === n);
-    const head = `<div class="semhead"><p class="semester">${n}. félév</p>${canWrite ? `<button type="button" class="addev" data-newcourse="${n}">+ Új tárgy</button>` : ""}</div>`;
+    const head = `<div class="semhead"><p class="semester">${n}. félév</p>${canWrite ? `<button type="button" class="addev" data-newcourse="${n}">+ Új tárgy</button>
+      <button type="button" class="delsem" data-delsem="${n}">${semDelArmed === n ? (list.length ? `Biztosan? A ${list.length} tárgy is törlődik. Kattints újra` : "Biztosan? Kattints újra") : "Félév törlése"}</button>` : ""}</div>`;
     return `<section class="sect" id="felev${n}">${i === 0 ? `<div><h1>Tárgyak</h1>${head}</div>` : head}
       ${list.length ? `<div class="grid">${list.map(tile).join("")}</div>` : `<div class="empty">Ebben a félévben még nincs tárgy.${canWrite ? " Az „+ Új tárgy” gombbal vehetsz fel egyet." : ""}</div>`}</section>`;
   };
@@ -1001,6 +1004,22 @@ async function deleteCourse() {
     closeEvent(); go("naptar");
   } catch { coDelArmed = false; drawCourseDialog("A törlés nem sikerült, próbáld újra."); }
 }
+/* Félév törlése: a félév tárgyai is törlődnek (a beépítettek elrejtve), egyetlen mentéssel */
+let semDelArmed = null;
+async function deleteSemester(n) {
+  if (semDelArmed !== n) { semDelArmed = n; return render(); }
+  semDelArmed = null;
+  const prev = JSON.stringify({ courses: STORE.courses, meta: STORE.meta });
+  STORE.courses = STORE.courses || {}; STORE.meta = STORE.meta || {};
+  for (const c of COURSES.filter(c => (c.sem ?? 2) === n)) {
+    if (BASE_COURSES.some(b => b.id === c.id)) STORE.courses[c.id] = { hidden: true, name: c.name };
+    else delete STORE.courses[c.id];
+  }
+  STORE.meta.semesters = { list: (STORE.meta.semesters?.list || []).filter(x => x !== n) };
+  try { await ghSave(`Félévek: ${n}. félév törölve`); }
+  catch { Object.assign(STORE, JSON.parse(prev)); try { await reloadStore(); } catch {} }
+  refreshAll();
+}
 async function addSemester() {
   const n = Math.max(...semesters()) + 1, list = [...new Set([...(STORE.meta?.semesters?.list || []), n])];
   try { await dbApi.doc("meta/semesters").set({ list }); toSemester("felev" + n); } catch {}
@@ -1216,11 +1235,13 @@ app.addEventListener("submit", ev => {
   saveResults(byId[ev.target.dataset.course]);
 });
 app.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-newcourse],[data-editcourse],#addSem,[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
+  const t = ev.target.closest("[data-delsem],[data-newcourse],[data-editcourse],#addSem,[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
   if (!t) return;
   if (t.dataset.newcourse) return openCourse(null, t.dataset.newcourse);
   if (t.dataset.editcourse) return openCourse(t.dataset.editcourse);
   if (t.id === "addSem") return addSemester();
+  if (t.dataset.delsem) return deleteSemester(Number(t.dataset.delsem));
+  if (semDelArmed != null) { semDelArmed = null; render(); }
   if (t.dataset.evedit?.startsWith("t:")) return openCourse(t.dataset.evedit.split(":")[1]);
   if (t.dataset.evedit) return openEvent(t.dataset.evedit);
   if (t.dataset.evnew !== undefined) return openEvent(null, t.dataset.evnew);

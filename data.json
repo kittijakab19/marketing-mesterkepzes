@@ -8,6 +8,13 @@
       },
       "bonus": 10,
       "grade": null
+    },
+    "kozgazdasag": {
+      "parts": {
+        "I. ZH": 47.5,
+        "II. ZH": 42.66
+      },
+      "bonus": 10
     }
   },
   "events": {

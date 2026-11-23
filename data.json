@@ -40,7 +40,69 @@
       "note": ""
     }
   },
-  "courses": {},
+  "courses": {
+    "marketingmenedzsment": {
+      "name": "Marketingmenedzsment",
+      "sem": 2,
+      "h": 225,
+      "code": "MANT00MA06",
+      "credit": "6",
+      "owner": "Dr. Papp-Váry Árpád Ferenc",
+      "dept": "Marketing Tanszék",
+      "eval": "Kollokvium",
+      "goal": "A korábbi marketingismeretek rendszerezése egy modern, holisztikus marketingmodell alapján, és a legújabb marketingfogalmak, trendek megismerése.",
+      "tasks": [
+        {
+          "name": "I. ZH",
+          "max": "50",
+          "date": "2026-10-10",
+          "time": "12:05–12:35",
+          "form": "Vizsgaközponti (VK)"
+        },
+        {
+          "name": "II. ZH",
+          "max": "50",
+          "date": "2026-12-05",
+          "time": "12:05–12:35",
+          "form": "Vizsgaközponti (VK)"
+        }
+      ],
+      "bonusMax": "5",
+      "zhMin": "50",
+      "totalMin": "60",
+      "retake": "",
+      "topics": [
+        "A marketingmenedzsment alapjai",
+        "Fogyasztói és üzleti piacok elemzése",
+        "Marketingkutatás és insightok",
+        "Piaci szegmentáció",
+        "Pozicionálás",
+        "Termék- és szolgáltatásstratégia",
+        "Árképzés és értékesítésösztönzés",
+        "Marketingkommunikáció",
+        "Értékesítési csatornák és kiskereskedelem",
+        "Növekedés versenypiacokon és innováció",
+        "CSR és fenntarthatóság a marketingben",
+        "Összefoglalás: nemzetközi piacra lépés, globális márkaépítés"
+      ],
+      "lit": [
+        "Kotler – Keller (2016): Marketingmenedzsment, 14. kiadás (MeRSZ)",
+        "Papp-Váry Á. (2026): előadásdiák PDF-ben, CooSpace"
+      ],
+      "study": [
+        {
+          "name": "I. ZH",
+          "url": "https://claude.ai/artifact/Xs1P8SMksS4Vg6admWEMGA",
+          "desc": "Kotler–Keller 1–3. fejezet, 2 előadás, próba-ZH."
+        },
+        {
+          "name": "II. ZH",
+          "url": "https://claude.ai/artifact/2qzAiakLDYSbQKHMP5quX9",
+          "desc": ""
+        }
+      ]
+    }
+  },
   "meta": {
     "semesters": {
       "list": []

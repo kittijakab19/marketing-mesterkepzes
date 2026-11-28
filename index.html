@@ -63,6 +63,24 @@ mark { background: var(--mark); color: var(--mark-fg); border-radius: 3px; paddi
 .semester { margin: 4px 0 0; font-size: 1.1rem; font-weight: 800; color: var(--muted); }
 [id^="felev"] { scroll-margin-top: 90px; }
 .semhead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.sechead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.upbtn { cursor: pointer; font-size: .88rem; font-weight: 800; padding: 6px 14px; border-radius: 99px; background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.upbtn:hover { background: hsl(var(--h) var(--tile-s) var(--tile-deep)); }
+.upbtn:focus-within, label.upbtn:focus-visible { outline: 2px solid var(--accent-strong); }
+.filelink { font-size: .88rem; font-weight: 700; color: var(--accent-strong); text-decoration: none; }
+.filelink:hover { text-decoration: underline; }
+.upmsg { margin: 0; font-size: .9rem; font-weight: 700; color: var(--muted); }
+.upmsg.err { color: var(--warn); }
+.doclist { display: flex; flex-direction: column; gap: 8px; }
+.docrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 14px; background: var(--panel); box-shadow: var(--shadow); }
+.docrow .ext { display: grid; place-items: center; height: 44px; border-radius: 10px; font-size: .72rem; font-weight: 800; text-transform: uppercase; background: hsl(var(--h) var(--tile-s) var(--tile-l)); }
+.docrow a { font-weight: 700; color: var(--fg); text-decoration: none; overflow-wrap: anywhere; }
+.docrow a:hover { text-decoration: underline; }
+.docrow small { display: block; color: var(--muted); font-size: .8rem; font-weight: 600; }
+.docdl { font-size: .86rem; font-weight: 800; color: var(--accent-strong); text-decoration: none; }
+.docdel { color: var(--muted); font-size: .84rem; font-weight: 700; padding: 4px 8px; border-radius: 8px; }
+.docdel:hover { color: var(--warn); background: var(--warn-soft); }
+@media (max-width: 560px) { .docrow { grid-template-columns: 40px minmax(0, 1fr); } .docrow .docdl, .docrow .docdel { grid-column: 2; justify-self: start; } }
 .delsem { color: var(--muted); font-size: .86rem; font-weight: 700; }
 .delsem:hover { color: var(--warn); text-decoration: underline; }
 .addsem { padding: 10px 18px; border-radius: 14px; font-weight: 800; color: var(--accent-strong); border: 1.5px dashed var(--line); }
@@ -651,7 +669,17 @@ function viewCourse(c) {
     <section class="band"><button type="button" class="back" id="back">← Vissza a főoldalra</button><h1>${esc(c.name)}</h1>${canWrite ? `<button type="button" class="bandedit" data-editcourse="${c.id}">✎ Tárgy szerkesztése</button>` : ""}${c.status ? `<p class="lead" style="color:inherit">${esc(c.status)}</p>` : ""}</section>
     ${c.grade >= 2 && !Object.keys(c.study || {}).length ? "" : `<div class="studies">${studies}</div>`}
     <div class="cols">
-      <section class="sect"><h2>Tantárgyleírás</h2>${syllabusHtml(c)}</section>
+      <div class="stack">
+      <section class="sect"><div class="sechead"><h2>Tantárgyleírás</h2>
+        ${c.sylFile ? `<a class="filelink" href="${fileUrl(c.sylFile.path)}" target="_blank" rel="noopener">⬇ ${esc(c.sylFile.name)}</a>` : ""}
+        ${canWrite ? `<label class="upbtn" for="sylUp">${c.sylFile ? "Új Excel feltöltése" : "Excel feltöltése"}</label><input id="sylUp" type="file" accept=".xlsx,.xls" hidden data-course="${c.id}">` : ""}</div>
+        ${upMsg.course === c.id && upMsg.where === "syl" ? `<p class="upmsg${upMsg.err ? " err" : ""}" role="status">${esc(upMsg.text)}</p>` : ""}
+        ${syllabusHtml(c)}</section>
+      <section class="sect"><div class="sechead"><h2>Dokumentumok</h2>
+        ${canWrite ? `<label class="upbtn" for="docUp">+ Fájlok feltöltése</label><input id="docUp" type="file" multiple accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.key,.odp,.txt,.png,.jpg,.jpeg,.zip" hidden data-course="${c.id}">` : ""}</div>
+        ${upMsg.course === c.id && upMsg.where === "docs" ? `<p class="upmsg${upMsg.err ? " err" : ""}" role="status">${esc(upMsg.text)}</p>` : ""}
+        ${docsHtml(c)}</section>
+      </div>
       <aside class="side">
         <div class="panel score">
           <div class="scorehead"><h2>Hol tartok?</h2>${canWrite && editing !== c.id ? `<button type="button" class="editbtn" data-edit="${c.id}">Pontok szerkesztése</button>` : ""}</div>
@@ -873,7 +901,7 @@ function fromDef(id, d, b) {
     bonus: numOrNull(d.bonusMax) ? { max: numOrNull(d.bonusMax), score: b?.bonus?.score ?? 0 } : null,
     need: null, grade: null, status: "",
     study: Object.fromEntries((d.study || []).filter(x => x.name && x.url).map(x => [x.name, { url: x.url, desc: x.desc || "" }])),
-    materials: [], custom: !b,
+    materials: [], custom: !b, docs: d.docs || [], sylFile: d.sylFile || null,
   };
 }
 function sylFromDef(d) {
@@ -909,7 +937,8 @@ function courseDef(id) {
     tasks: c.parts.map(p => ({ name: p.name, max: p.max ?? "", date: p.date || "", time: timeOf(p), form: formOf(p.name) })),
     bonusMax: y.bonusMax ?? c.bonus?.max ?? "", zhMin: y.zhMin ?? "", totalMin: y.totalMin ?? 60, retake: y.retake || "",
     topics: y.topics || [], lit: y.lit || [],
-    study: Object.entries(c.study || {}).map(([k, v]) => ({ name: k, url: v.url, desc: v.desc || "" })) };
+    study: Object.entries(c.study || {}).map(([k, v]) => ({ name: k, url: v.url, desc: v.desc || "" })),
+    docs: c.docs || [], sylFile: c.sylFile || null };
 }
 let coId = null, coDraft = null, coDelArmed = false, coNote = "";
 function openCourse(id, sem) {
@@ -1099,6 +1128,108 @@ evDlg.addEventListener("click", ev => {
   if (ev.target.id === "coDel") deleteCourse();
 });
 
+
+/* ===== Fájlok a repóban: tantárgyleírás Excel és órai dokumentumok =====
+   A fájlok a repó files/<tárgy>/ mappájába kerülnek (nyilvánosak, mint a repó). */
+let upMsg = {}, docDelArmed = null;
+const MAX_FILE_MB = 50;
+const fileUrl = path => `https://github.com/${GH.owner}/${GH.repo}/raw/${GH.branch}/${path.split("/").map(encodeURIComponent).join("/")}`;
+const safeName = n => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9._-]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || "fajl";
+const fmtSize = b => b >= 1048576 ? `${(b / 1048576).toLocaleString("hu-HU", { maximumFractionDigits: 1 })} MB` : `${Math.max(1, Math.round(b / 1024))} kB`;
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf); let out = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) out += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(out);
+}
+async function ghPutFile(path, buf, message) {
+  const r = await fetch(`${GH_API}/contents/${path.split("/").map(encodeURIComponent).join("/")}`, { method: "PUT",
+    headers: { ...ghHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ message, content: bufToB64(buf), branch: GH.branch }) });
+  if (!r.ok) throw new Error("upload " + r.status);
+}
+async function ghDeleteFile(path, message) {
+  const url = `${GH_API}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
+  const g = await fetch(`${url}?ref=${GH.branch}`, { headers: ghHeaders(), cache: "no-store" });
+  if (g.status === 404) return;
+  if (!g.ok) throw new Error("get " + g.status);
+  const { sha } = await g.json();
+  const r = await fetch(url, { method: "DELETE", headers: { ...ghHeaders(), "Content-Type": "application/json" }, body: JSON.stringify({ message, sha, branch: GH.branch }) });
+  if (!r.ok) throw new Error("delete " + r.status);
+}
+/* a tárgy definícióját frissíti (a beépített tárgyból is definíció lesz) */
+async function saveCourseDef(id, change) {
+  const def = { ...(STORE.courses?.[id]?.name ? STORE.courses[id] : courseDef(id)) };
+  change(def);
+  await dbApi.doc("courses/" + id).set(def);
+}
+function setUpMsg(course, where, text, err) { upMsg = { course, where, text, err: !!err }; render(); }
+function docsHtml(c) {
+  const docs = c.docs || [];
+  if (!docs.length) return `<div class="empty">Még nincs feltöltött dokumentum.${canWrite ? " Az órai PDF-eket, PPT-ket a „+ Fájlok feltöltése” gombbal töltheted fel." : ""}</div>`;
+  return `<div class="doclist">${docs.map((d, i) => {
+    const ext = (d.name.split(".").pop() || "").slice(0, 4), when = d.added ? parse(d.added) : null;
+    return `<div class="docrow"><span class="ext">${esc(ext)}</span>
+      <span><a href="${fileUrl(d.path)}" target="_blank" rel="noopener">${esc(d.name)}</a><small>${fmtSize(d.size || 0)}${when ? ` · ${MONTHS[when.getMonth()]} ${when.getDate()}.` : ""}</small></span>
+      <a class="docdl" href="${fileUrl(d.path)}" target="_blank" rel="noopener">Letöltés</a>
+      ${canWrite ? `<button type="button" class="docdel" data-deldoc="${c.id}:${i}">${docDelArmed === `${c.id}:${i}` ? "Biztosan? Kattints újra" : "Törlés"}</button>` : "<span></span>"}</div>`;
+  }).join("")}</div>`;
+}
+async function uploadSyllabus(courseId, file) {
+  if (file.size > MAX_FILE_MB * 1048576) return setUpMsg(courseId, "syl", `A fájl nagyobb, mint ${MAX_FILE_MB} MB.`, true);
+  setUpMsg(courseId, "syl", "Feltöltés és beolvasás…");
+  try {
+    const buf = await file.arrayBuffer();
+    const XLSX = await loadXlsx();
+    const x = parseBGE(XLSX, XLSX.read(buf, { type: "array" }));
+    const path = `files/${courseId}/tantargyleiras-${safeName(file.name)}`;
+    await ghPutFile(path, buf, `Tantárgyleírás: ${byId[courseId]?.name || courseId}`);
+    await saveCourseDef(courseId, d => {
+      for (const k of ["code", "credit", "owner", "dept", "eval", "goal"]) if (x[k]) d[k] = x[k];
+      if (x.tasks.length) d.tasks = x.tasks.map(t => { const o = (d.tasks || []).find(o => o.name === t.name); return { ...t, date: o?.date || "", time: o?.time || "" }; });
+      if (x.topics.length) d.topics = x.topics;
+      if (x.lit.length) d.lit = x.lit;
+      if (x.bonusMax !== "") d.bonusMax = x.bonusMax;
+      if (x.zhMin !== "") d.zhMin = x.zhMin;
+      d.totalMin = x.totalMin;
+      d.sylFile = { name: file.name, path };
+    });
+    setUpMsg(courseId, "syl", x.tasks.length || x.topics.length
+      ? `Kész: ${x.tasks.length} számonkérés és ${x.topics.length} ismeretkör beolvasva. A ZH-dátumokat a „Tárgy szerkesztése” gombbal adhatod meg.`
+      : "A fájl feltöltődött, de nem találtam benne a BGE-sablon mezőit. A tantárgyleírást a „Tárgy szerkesztése” gombbal töltheted ki.");
+  } catch { setUpMsg(courseId, "syl", "A feltöltés nem sikerült. Ellenőrizd, hogy be vagy-e jelentkezve a lakattal, és próbáld újra.", true); }
+}
+async function uploadDocs(courseId, files) {
+  const list = [...files], big = list.filter(f => f.size > MAX_FILE_MB * 1048576);
+  if (big.length) return setUpMsg(courseId, "docs", `${big.map(f => f.name).join(", ")}: nagyobb, mint ${MAX_FILE_MB} MB. Ezt nem tudom feltölteni.`, true);
+  const added = [];
+  try {
+    for (const [i, f] of list.entries()) {
+      setUpMsg(courseId, "docs", `Feltöltés: ${f.name} (${i + 1}/${list.length})…`);
+      const path = `files/${courseId}/${Date.now().toString(36)}-${safeName(f.name)}`;
+      await ghPutFile(path, await f.arrayBuffer(), `Dokumentum: ${f.name}`);
+      added.push({ name: f.name, path, size: f.size, added: TODAY });
+    }
+  } catch { if (!added.length) return setUpMsg(courseId, "docs", "A feltöltés nem sikerült. Ellenőrizd, hogy be vagy-e jelentkezve a lakattal, és próbáld újra.", true); }
+  try {
+    await saveCourseDef(courseId, d => { d.docs = [...(d.docs || []), ...added]; });
+    setUpMsg(courseId, "docs", added.length === list.length ? `Feltöltve: ${added.length} fájl.` : `Csak ${added.length} fájl töltődött fel a ${list.length}-ből. A többit próbáld újra.`, added.length !== list.length);
+  } catch { setUpMsg(courseId, "docs", "A fájlok feltöltődtek, de a listát nem sikerült menteni. Próbáld újra.", true); }
+}
+async function deleteDoc(key) {
+  if (docDelArmed !== key) { docDelArmed = key; return render(); }
+  docDelArmed = null;
+  const [courseId, i] = key.split(":"), doc = byId[courseId]?.docs?.[+i];
+  if (!doc) return;
+  try {
+    await saveCourseDef(courseId, d => { d.docs = (d.docs || []).filter(x => x.path !== doc.path); });
+    await ghDeleteFile(doc.path, `Dokumentum törölve: ${doc.name}`);
+    setUpMsg(courseId, "docs", `Törölve: ${doc.name}`);
+  } catch { setUpMsg(courseId, "docs", "A törlés nem sikerült, próbáld újra.", true); }
+}
+app.addEventListener("change", ev => {
+  if (ev.target.id === "sylUp" && ev.target.files?.[0]) uploadSyllabus(ev.target.dataset.course, ev.target.files[0]);
+  if (ev.target.id === "docUp" && ev.target.files?.length) uploadDocs(ev.target.dataset.course, ev.target.files);
+});
+
 /* ===== Tárolás a GitHubon: az eredmények és a dátumok a repó data.json fájljában vannak =====
    Olvasni bárki tud; írni az tud, aki ezen a gépen megadta a saját GitHub-tokenjét (csak ebben a böngészőben marad). */
 const GH = { owner: "kittijakab19", repo: "marketing-mesterkepzes", path: "data.json", branch: "main" };
@@ -1222,7 +1353,7 @@ function render() {
 }
 
 function go(view, course) {
-  editing = null; editError = "";
+  editing = null; editError = ""; upMsg = {}; docDelArmed = null;
   state.view = view; state.course = course ?? null;
   const hash = view === "targy" ? course : view;
   try { history.replaceState(null, "", "#" + hash); } catch {}
@@ -1235,12 +1366,14 @@ app.addEventListener("submit", ev => {
   saveResults(byId[ev.target.dataset.course]);
 });
 app.addEventListener("click", ev => {
-  const t = ev.target.closest("[data-delsem],[data-newcourse],[data-editcourse],#addSem,[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
+  const t = ev.target.closest("[data-deldoc],[data-delsem],[data-newcourse],[data-editcourse],#addSem,[data-evedit],[data-evnew],[data-edit],#editCancel,[data-course],[data-month],[data-day],#back,#clearday");
   if (!t) return;
   if (t.dataset.newcourse) return openCourse(null, t.dataset.newcourse);
   if (t.dataset.editcourse) return openCourse(t.dataset.editcourse);
   if (t.id === "addSem") return addSemester();
   if (t.dataset.delsem) return deleteSemester(Number(t.dataset.delsem));
+  if (t.dataset.deldoc) return deleteDoc(t.dataset.deldoc);
+  if (docDelArmed != null) { docDelArmed = null; render(); }
   if (semDelArmed != null) { semDelArmed = null; render(); }
   if (t.dataset.evedit?.startsWith("t:")) return openCourse(t.dataset.evedit.split(":")[1]);
   if (t.dataset.evedit) return openEvent(t.dataset.evedit);

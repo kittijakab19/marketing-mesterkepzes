@@ -15,6 +15,14 @@
         "II. ZH": 42.66
       },
       "bonus": 10
+    },
+    "ertekteremtes": {
+      "parts": {
+        "I. ZH": 35.09,
+        "Teszt": null,
+        "II. ZH": null
+      },
+      "bonus": 5.5
     }
   },
   "events": {
